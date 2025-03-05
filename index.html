@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8"> <!-- Кодировка для всех браузеров -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Адаптация к мобильным -->
+    <title>Дыхательная практика Вима Хоффа</title>
+    <style>
+        body {
+            background-color: #2A2F3A; /* Мягкий тёмно-серый фон */
+            color: #F5F5F5; /* Смягчённый белый текст */
+            text-align: center;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            min-height: 100vh; /* Адаптация под высоту экрана */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            overflow: hidden; /* Без прокрутки */
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 100%;
+            min-height: 100vh;
+            max-height: 100vh;
+            padding: 1vh 1vw; /* Относительные отступы */
+            box-sizing: border-box;
+        }
+        .container.settings-visible {
+            justify-content: center; /* Центрирование настроек на начальном экране */
+        }
+        .container.breathing-visible {
+            justify-content: space-between; /* Равномерное распределение во время практики */
+        }
+        h1 {
+            margin: 1vh 0;
+            font-size: clamp(16px, 5vw, 24px); /* Адаптивный заголовок */
+        }
+        .settings {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 0; /* Убран лишний отступ */
+        }
+        .settings div {
+            margin: 1vh 0;
+            display: flex;
+            justify-content: space-between;
+            width: min(80vw, 300px);
+        }
+        .settings input {
+            margin-left: 2vw;
+            padding: 1vh;
+            border-radius: 5px;
+            border: none;
+            width: clamp(50px, 15vw, 100px); /* Адаптивная ширина */
+            font-size: clamp(10px, 3vw, 14px);
+        }
+        button {
+            margin: 0.5vh 1vw;
+            padding: clamp(6px, 1vh, 12px) clamp(10px, 3vw, 20px);
+            font-size: clamp(10px, 3vw, 16px);
+            cursor: pointer;
+            background-color: #90CAF9; /* Мягкий голубой */
+            color: #F5F5F5;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #64B5F6; /* Светло-голубой ховер */
+        }
+        #breathingSection {
+            display: none;
+            width: 100%;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            overflow-y: auto; /* Гарантия видимости кнопок */
+        }
+        .text-section {
+            width: 100%;
+            text-align: center;
+        }
+        #roundInfo {
+            font-size: clamp(10px, 3vw, 14px);
+            margin-bottom: 1vh;
+        }
+        .circle-section {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            max-height: 70vh; /* Ограничение высоты для видимости кнопок */
+            justify-content: center;
+        }
+        .circle {
+            width: min(50vw, 200px);
+            height: min(50vw, 200px);
+            border-radius: 50%;
+            background-color: transparent;
+            border: 3px solid #FFAB91; /* Начальная окантовка для выдоха (персиковый) */
+            box-shadow: 0 0 20px rgba(255, 171, 145, 0.6); /* Начальное свечение для выдоха */
+            transition: width 0s, height 0s, border-color 0s, box-shadow 0s, opacity 0.5s;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            z-index: 1;
+        }
+        .circle-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            max-width: min(40vw, 160px); /* Адаптивный текст внутри круга */
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .progress-bar {
+            width: min(80%, 160px); /* Не выходит за края круга */
+            height: clamp(10px, 2vw, 15px);
+            background-color: #4A5366; /* Мягкий тёмно-синий серый */
+            border-radius: 10px;
+            display: none;
+            position: relative;
+            margin: 0 auto;
+            z-index: 1; /* Под текстом */
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background-color: #81C784; /* Светлый зелёный */
+            width: 0;
+            border-radius: 10px;
+            transition: width 0.5s;
+        }
+        .ripple {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            border: 2px solid rgba(245, 245, 245, 0.7); /* Смягчённый белый */
+            opacity: 0;
+            z-index: 0;
+        }
+        .ripple.active {
+            animation: ripple 1s infinite;
+            -webkit-animation: ripple 1s infinite; /* Для Safari */
+        }
+        @keyframes ripple {
+            0% {
+                width: 0;
+                height: 0;
+                opacity: 1;
+            }
+            100% {
+                width: min(75vw, 300px);
+                height: min(75vw, 300px);
+                opacity: 0;
+            }
+        }
+        #instruction {
+            font-size: clamp(12px, 4.5vw, 18px);
+            max-width: 100%;
+            overflow-wrap: break-word;
+            z-index: 2;
+            color: #F5F5F5;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(245, 245, 245, 0.8); /* Чёткость для отсчёта */
+            transition: opacity 0.5s;
+            opacity: 0;
+            margin-bottom: 1vh; /* Чуть выше шкалы */
+        }
+        #timerInsideCircle {
+            font-size: clamp(20px, 8vw, 32px);
+            display: none;
+            margin-top: 1vh;
+            color: #F5F5F5;
+            z-index: 2;
+        }
+        .controls-section {
+            width: 100%;
+            text-align: center;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            flex-shrink: 0; /* Кнопки всегда видны */
+            margin-bottom: 1vh;
+        }
+        #pauseButton, #resetButton {
+            margin: 0.5vh 1vw;
+        }
+        #completionMessage {
+            display: none;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 1vh 0;
+        }
+        .link-button {
+            display: inline-block;
+            margin: 0.5vh 1vw;
+            padding: clamp(6px, 1vh, 12px) clamp(10px, 3vw, 20px);
+            font-size: clamp(10px, 3vw, 14px);
+            background-color: #90CAF9; /* Мягкий голубой */
+            color: #F5F5F5;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .link-button:hover {
+            background-color: #64B5F6; /* Светло-голубой ховер */
+        }
+
+        /* Медиа-запрос для узких экранов (< 400px) */
+        @media (max-width: 400px) {
+            h1 {
+                font-size: 14px;
+            }
+            .settings input {
+                width: 20vw;
+                font-size: 10px;
+            }
+            button, .link-button {
+                padding: 0.8vh 2vw;
+                font-size: 12px;
+            }
+            #roundInfo {
+                font-size: 12px;
+            }
+            .progress-bar {
+                height: 10px;
+            }
+            #instruction {
+                font-size: 12px;
+            }
+            #timerInsideCircle {
+                font-size: 20px;
+            }
+            .controls-section {
+                flex-direction: column; /* Кнопки вертикально на узких экранах */
+            }
+            #pauseButton, #resetButton {
+                margin: 0.5vh 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container settings-visible" id="container">
+        <h1>Дыхательная практика Вима Хоффа</h1>
+        <div class="text-section">
+            <div id="roundInfo"></div>
+        </div>
+        <div class="settings" id="settings">
+            <div>
+                Время вдоха (сек): <input type="number" id="inhalationTime" value="2" min="1">
+            </div>
+            <div>
+                Время выдоха (сек): <input type="number" id="exhalationTime" value="2" min="1">
+            </div>
+            <div>
+                Начальная задержка дыхания (сек): <input type="number" id="initialBreathHoldTime" value="60" min="1">
+            </div>
+            <div>
+                Количество подходов: <input type="number" id="numberOfRounds" value="3" min="1">
+            </div>
+            <button onclick="startSession()">Начать</button>
+        </div>
+        <div id="breathingSection" style="display: none;">
+            <div class="circle-section">
+                <div class="circle" id="circle">
+                    <div class="circle-content">
+                        <div id="instruction"></div>
+                        <div class="progress-bar" id="progressBarContainer">
+                            <div class="progress-bar-fill" id="progressBar"></div>
+                        </div>
+                        <div id="timerInsideCircle"></div>
+                    </div>
+                    <div class="ripple" id="rippleEffect"></div>
+                </div>
+            </div>
+            <div class="controls-section">
+                <button onclick="pauseSession()" id="pauseButton" style="display: none;">Пауза</button>
+                <button onclick="resetSession()" id="resetButton" style="display: none;">Сброс</button>
+            </div>
+        </div>
+        <div id="completionMessage" style="display: none;">
+            <p>Практика завершена, Вы молодец!</p>
+            <button onclick="resetSession()">Ещё раз</button>
+            <a href="https://plainly.ru/30-luchshikh-besplatnykh-ii-servisov" target="_blank" class="link-button">Посмотри, это интересно</a>
+        </div>
+    </div>
+
+    <script>
+        const smallSize = 'min(50vw, 200px)';
+        const largeSize = 'min(75vw, 300px)';
+        const inhalationColor = '#66BB6A'; // Мягкий зелёный
+        const exhalationColor = '#FFAB91'; // Нежный персиковый
+
+        let inhalationTime, exhalationTime, initialBreathHoldTime, numberOfRounds;
+        let currentBreathHoldTime, currentCycle = 0, currentRound = 0;
+        let isPaused = false, timerInterval, phaseTimeout, remainingTime, currentPhase, nextCallback;
+
+        function setCircle(size, color, transitionTime) {
+            const circle = document.getElementById('circle');
+            circle.style.transition = `width ${transitionTime}s, height ${transitionTime}s, border-color ${transitionTime}s, box-shadow ${transitionTime}s, opacity 0.5s`;
+            circle.style.width = size;
+            circle.style.height = size;
+            circle.style.borderColor = color;
+            circle.style.boxShadow = `0 0 20px ${color === inhalationColor ? 'rgba(102, 187, 106, 0.6)' : 'rgba(255, 171, 145, 0.6)'}`;
+            circle.style.opacity = '1';
+        }
+
+        function setCircleImmediate(size, color) {
+            const circle = document.getElementById('circle');
+            circle.style.transition = 'none';
+            circle.style.width = size;
+            circle.style.height = size;
+            circle.style.borderColor = color;
+            circle.style.boxShadow = `0 0 20px ${color === inhalationColor ? 'rgba(102, 187, 106, 0.6)' : 'rgba(255, 171, 145, 0.6)'}`;
+            circle.style.opacity = '0.1'; // Минимальная видимость для отсчёта
+            window.setTimeout(() => {
+                circle.style.transition = '';
+            }, 0);
+        }
+
+        function setInstruction(text) {
+            const instruction = document.getElementById('instruction');
+            instruction.innerHTML = text;
+            instruction.style.opacity = '1';
+        }
+
+        function hideInstruction() {
+            const instruction = document.getElementById('instruction');
+            instruction.style.opacity = '0';
+        }
+
+        function setRoundInfo(round, total) {
+            document.getElementById('roundInfo').innerHTML = `Подход ${round} из ${total}`;
+        }
+
+        function setTimer(time) {
+            const timerInsideCircle = document.getElementById('timerInsideCircle');
+            timerInsideCircle.innerHTML = time;
+            timerInsideCircle.style.display = 'block';
+        }
+
+        function hideTimer() {
+            document.getElementById('timerInsideCircle').style.display = 'none';
+        }
+
+        function showProgressbar() {
+            document.getElementById('progressBarContainer').style.display = 'block';
+            document.getElementById('progressBar').style.width = '0%';
+        }
+
+        function hideProgressbar() {
+            document.getElementById('progressBarContainer').style.display = 'none';
+        }
+
+        function updateProgressbar(cycleNumber) {
+            const progress = (cycleNumber / 30) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+        }
+
+        function startCountdown(callback) {
+            document.getElementById('circle').style.display = 'flex';
+            document.getElementById('circle').style.opacity = '0.1'; // Минимальная видимость для текста
+            let countdown = 3;
+            setInstruction(`Готовимся: ${countdown}`);
+            hideTimer();
+            const countdownInterval = setInterval(() => {
+                countdown--;
+                if (countdown > 0) {
+                    setInstruction(`Готовимся: ${countdown}`);
+                } else {
+                    clearInterval(countdownInterval);
+                    hideInstruction();
+                    callback();
+                }
+            }, 1000);
+        }
+
+        function startPhase(phaseName, time, circleSize, circleColor, callback) {
+            if (isPaused) return;
+            setInstruction(phaseName === "ВДОХ" || phaseName === "ВЫДОХ" ? phaseName : phaseName.charAt(0).toUpperCase() + phaseName.slice(1));
+            hideTimer();
+            setCircle(circleSize, circleColor, time);
+            currentPhase = phaseName;
+            remainingTime = time;
+            nextCallback = callback;
+            phaseTimeout = window.setTimeout(() => {
+                if (!isPaused) callback();
+            }, time * 1000);
+        }
+
+        function startHoldPhase(phaseName, time, circleSize, circleColor, callback) {
+            if (isPaused) return;
+            setInstruction(phaseName);
+            setCircle(circleSize, circleColor, 0); // Круг остаётся видимым
+            const ripple = document.getElementById('rippleEffect');
+            ripple.classList.add('active');
+            let remaining = time;
+            currentPhase = phaseName;
+            remainingTime = remaining;
+            nextCallback = () => {
+                ripple.classList.remove('active');
+                callback();
+            };
+            setTimer(remaining);
+            timerInterval = window.setInterval(() => {
+                remaining--;
+                if (remaining >= 0 && !isPaused) {
+                    setTimer(remaining);
+                }
+            }, 1000);
+            phaseTimeout = window.setTimeout(() => {
+                window.clearInterval(timerInterval);
+                setTimer(0);
+                ripple.classList.remove('active');
+                hideTimer();
+                if (!isPaused) callback();
+            }, time * 1000);
+        }
+
+        function resumePhase() {
+            if (currentPhase === 'ВДОХ') {
+                startPhase('ВДОХ', remainingTime, largeSize, inhalationColor, nextCallback);
+            } else if (currentPhase === 'ВЫДОХ') {
+                startPhase('ВЫДОХ', remainingTime, smallSize, exhalationColor, nextCallback);
+            } else if (currentPhase === 'Задержка дыхания после выдоха') {
+                startHoldPhase('Задержка дыхания после выдоха', remainingTime, smallSize, exhalationColor, nextCallback);
+            } else if (currentPhase === 'Глубокий вдох') {
+                startPhase('Глубокий вдох', remainingTime, largeSize, inhalationColor, nextCallback);
+            } else if (currentPhase === 'Задержка после глубокого вдоха') {
+                startHoldPhase('Задержка после глубокого вдоха', remainingTime, largeSize, inhalationColor, nextCallback);
+            } else if (currentPhase === 'Финальный выдох') {
+                startPhase('Финальный выдох', remainingTime, smallSize, exhalationColor, nextCallback);
+            }
+        }
+
+        function performCycle(index, callback) {
+            startPhase('ВДОХ', inhalationTime, largeSize, inhalationColor, () => {
+                startPhase('ВЫДОХ', exhalationTime, smallSize, exhalationColor, () => {
+                    updateProgressbar(index + 1);
+                    if (index < 29) {
+                        performCycle(index + 1, callback);
+                    } else {
+                        hideProgressbar();
+                        callback();
+                    }
+                });
+            });
+        }
+
+        function performBreathHold() {
+            const deepInhalationTime = Math.round(inhalationTime * 1.2);
+            const deepExhalationTime = Math.round(exhalationTime * 1.2);
+            startPhase('ВЫДОХ', exhalationTime, smallSize, exhalationColor, () => {
+                startHoldPhase('Задержка дыхания после выдоха', currentBreathHoldTime, smallSize, exhalationColor, () => {
+                    startPhase('Глубокий вдох', deepInhalationTime, largeSize, inhalationColor, () => {
+                        startHoldPhase('Задержка после глубокого вдоха', 15, largeSize, inhalationColor, () => {
+                            startPhase('Финальный выдох', deepExhalationTime, smallSize, exhalationColor, () => {
+                                endRound();
+                            });
+                        });
+                    });
+                });
+            });
+        }
+
+        function startRound() {
+            currentCycle = 0;
+            setRoundInfo(currentRound + 1, numberOfRounds);
+            startCountdown(() => {
+                startPhase('ВЫДОХ', exhalationTime, smallSize, exhalationColor, () => {
+                    showProgressbar();
+                    performCycle(0, performBreathHold);
+                });
+            });
+        }
+
+        function startSession() {
+            inhalationTime = parseInt(document.getElementById('inhalationTime').value) || 4;
+            exhalationTime = parseInt(document.getElementById('exhalationTime').value) || 6;
+            initialBreathHoldTime = parseInt(document.getElementById('initialBreathHoldTime').value) || 30;
+            numberOfRounds = parseInt(document.getElementById('numberOfRounds').value) || 2;
+            currentBreathHoldTime = initialBreathHoldTime;
+            currentRound = 0;
+            const container = document.getElementById('container');
+            container.classList.remove('settings-visible');
+            container.classList.add('breathing-visible');
+            document.getElementById('settings').style.display = 'none';
+            document.getElementById('breathingSection').style.display = 'flex';
+            document.getElementById('pauseButton').style.display = 'inline';
+            document.getElementById('resetButton').style.display = 'inline';
+            setCircleImmediate(smallSize, exhalationColor);
+            startRound();
+        }
+
+        function endRound() {
+            currentRound++;
+            if (currentRound < numberOfRounds) {
+                currentBreathHoldTime = Math.round(currentBreathHoldTime * 1.68);
+                startRound();
+            } else {
+                document.getElementById('roundInfo').style.display = 'none'; // Скрываем надпись с подходами
+                document.getElementById('completionMessage').style.display = 'flex';
+                document.getElementById('breathingSection').style.display = 'none';
+            }
+        }
+
+        function pauseSession() {
+            if (!isPaused) {
+                clearInterval(timerInterval);
+                clearTimeout(phaseTimeout);
+                isPaused = true;
+                document.getElementById('pauseButton').innerHTML = 'Продолжить';
+            } else {
+                resumeSession();
+            }
+        }
+
+        function resumeSession() {
+            isPaused = false;
+            document.getElementById('pauseButton').innerHTML = 'Пауза';
+            resumePhase();
+        }
+
+        function resetSession() {
+            clearInterval(timerInterval);
+            clearTimeout(phaseTimeout);
+            const container = document.getElementById('container');
+            container.classList.remove('breathing-visible');
+            container.classList.add('settings-visible');
+            document.getElementById('settings').style.display = 'block';
+            document.getElementById('breathingSection').style.display = 'none';
+            document.getElementById('completionMessage').style.display = 'none';
+            document.getElementById('roundInfo').style.display = 'block'; // Восстанавливаем надпись с подходами
+            document.getElementById('pauseButton').style.display = 'none';
+            document.getElementById('resetButton').style.display = 'none';
+            currentCycle = 0;
+            currentRound = 0;
+            isPaused = false;
+            document.getElementById('pauseButton').innerHTML = 'Пауза';
+            document.getElementById('progressBar').style.width = '0%';
+            hideProgressbar();
+        }
+    </script>
+</body>
+</html>
