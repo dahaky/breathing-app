@@ -169,7 +169,7 @@
             background-color: transparent;
             border: 3px solid #FFAB91;
             box-shadow: 0 0 20px rgba(255, 171, 145, 0.6);
-            transition: width 0.5s ease, height 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease, opacity 0.5s ease;
+            transition: width 1.95s ease, height 1.95s ease, border-color 1.95s ease, box-shadow 1.95s ease, opacity 0.5s ease;
             position: relative;
             display: flex;
             align-items: center;
@@ -222,7 +222,7 @@
             background-color: #81C784;
             width: 0;
             border-radius: 10px;
-            transition: width 0.5s ease;
+            transition: width 1.95s ease;
         }
         .ripple {
             position: absolute;
@@ -335,12 +335,6 @@
         <div class="settings" id="settings">
             <button class="closeSettings" onclick="closeSettings()">X</button>
             <div>
-                Время вдоха (сек): <input type="range" id="inhalationTime" min="1" max="4" value="2"><span id="inhalationTimeValue">2</span>
-            </div>
-            <div>
-                Время выдоха (сек): <input type="range" id="exhalationTime" min="1" max="4" value="2"><span id="exhalationTimeValue">2</span>
-            </div>
-            <div>
                 Начальная задержка дыхания (сек): <input type="range" id="initialBreathHoldTime" min="10" max="120" value="60"><span id="initialBreathHoldTimeValue">60</span>
             </div>
             <div>
@@ -372,7 +366,6 @@
         </div>
     </div>
 
-    <!-- Обновленные пути к аудиофайлам -->
     <audio id="startAudio" src="/breathing-app/start.MP3"></audio>
     <audio id="breathingAudio" src="/breathing-app/breathing.MP3"></audio>
     <audio id="delayAudio" src="/breathing-app/delay.MP3" loop></audio>
@@ -383,8 +376,9 @@
         const largeSize = 'min(75vw, 300px)';
         const inhalationColor = '#66BB6A';
         const exhalationColor = '#FFAB91';
+        const PHASE_DURATION = 1.95; // 117 секунд / 60 фаз = 1.95 секунды на вдох/выдох
 
-        let inhalationTime, exhalationTime, initialBreathHoldTime, numberOfRounds;
+        let initialBreathHoldTime, numberOfRounds;
         let currentBreathHoldTime, currentCycle = 0, currentRound = 0;
         let isPaused = false, timerInterval, phaseTimeout, remainingTime, currentPhase, nextCallback;
 
@@ -393,7 +387,6 @@
         const delayAudio = document.getElementById('delayAudio');
         const exhalationAudio = document.getElementById('exhalationAudio');
 
-        // Отладка загрузки аудио
         window.onload = () => {
             console.log('Checking audio files...');
             [startAudio, breathingAudio, delayAudio, exhalationAudio].forEach(audio => {
@@ -403,7 +396,7 @@
             });
         };
 
-        const sliders = ['inhalationTime', 'exhalationTime', 'initialBreathHoldTime', 'numberOfRounds'];
+        const sliders = ['initialBreathHoldTime', 'numberOfRounds'];
         sliders.forEach(id => {
             const slider = document.getElementById(id);
             const valueSpan = document.getElementById(id + 'Value');
@@ -420,27 +413,15 @@
             document.getElementById('settings').style.height = '0';
         }
 
-        function setCircle(size, color, transitionTime) {
+        function setCircle(size, color) {
             const circle = document.getElementById('circle');
-            circle.style.transition = `width ${transitionTime}s ease, height ${transitionTime}s ease, border-color ${transitionTime}s ease, box-shadow ${transitionTime}s ease, opacity 0.5s ease`;
+            circle.style.transition = `width ${PHASE_DURATION}s ease, height ${PHASE_DURATION}s ease, border-color ${PHASE_DURATION}s ease, box-shadow ${PHASE_DURATION}s ease, opacity 0.5s ease`;
             circle.style.width = size;
             circle.style.height = size;
             circle.style.borderColor = color;
             circle.style.boxShadow = `0 0 20px ${color === inhalationColor ? 'rgba(102, 187, 106, 0.6)' : 'rgba(255, 171, 145, 0.6)'}`;
             circle.style.opacity = '1';
             circle.style.display = 'flex';
-        }
-
-        function setCircleImmediate(size, color) {
-            const circle = document.getElementById('circle');
-            circle.style.transition = 'none';
-            circle.style.width = size;
-            circle.style.height = size;
-            circle.style.borderColor = color;
-            circle.style.boxShadow = `0 0 20px ${color === inhalationColor ? 'rgba(102, 187, 106, 0.6)' : 'rgba(255, 171, 145, 0.6)'}`;
-            circle.style.opacity = '0.1';
-            circle.style.display = 'flex';
-            window.setTimeout(() => { circle.style.transition = ''; }, 0);
         }
 
         function setInstruction(text) {
@@ -479,36 +460,25 @@
         function updateProgressbar(cycleNumber) {
             const progress = (cycleNumber / 30) * 100;
             document.getElementById('progressBar').style.width = `${progress}%`;
+            document.getElementById('progressBar').style.transition = `width ${PHASE_DURATION}s ease`;
         }
 
-        function startPhase(phaseName, time, circleSize, circleColor, callback) {
+        function startPhase(phaseName, circleSize, circleColor, callback) {
             if (isPaused) return;
             console.log(`Starting phase: ${phaseName}`);
-            setInstruction(phaseName === "ВДОХ" || phaseName === "ВЫДОХ" ? phaseName : phaseName.charAt(0).toUpperCase() + phaseName.slice(1));
-            hideTimer();
-            setCircle(circleSize, circleColor, time);
-            if (phaseName === 'ВДОХ' || phaseName === 'ВЫДОХ') {
-                breathingAudio.currentTime = 0;
-                breathingAudio.playbackRate = 2 / (inhalationTime + exhalationTime);
-                console.log(`Playing breathing audio at rate ${breathingAudio.playbackRate}`);
-                breathingAudio.play().catch(e => console.error('Breathing audio play failed:', e));
-            }
+            setInstruction(phaseName);
+            setCircle(circleSize, circleColor);
             currentPhase = phaseName;
-            remainingTime = time;
-            nextCallback = callback;
             phaseTimeout = window.setTimeout(() => {
-                if (!isPaused) {
-                    if (phaseName === 'ВЫДОХ' && currentCycle === 29) breathingAudio.pause();
-                    callback();
-                }
-            }, time * 1000);
+                if (!isPaused) callback();
+            }, PHASE_DURATION * 1000);
         }
 
         function startHoldPhase(phaseName, time, circleSize, circleColor, callback) {
             if (isPaused) return;
             console.log(`Starting hold phase: ${phaseName}`);
             setInstruction(phaseName);
-            setCircle(circleSize, circleColor, 0);
+            setCircle(circleSize, circleColor);
             const ripple = document.getElementById('rippleEffect');
             ripple.classList.add('active');
             let remaining = time;
@@ -544,43 +514,50 @@
 
         function resumePhase() {
             if (currentPhase === 'ВДОХ') {
-                startPhase('ВДОХ', remainingTime, largeSize, inhalationColor, nextCallback);
+                startPhase('ВДОХ', largeSize, inhalationColor, nextCallback);
             } else if (currentPhase === 'ВЫДОХ') {
-                startPhase('ВЫДОХ', remainingTime, smallSize, exhalationColor, nextCallback);
+                startPhase('ВЫДОХ', smallSize, exhalationColor, nextCallback);
             } else if (currentPhase === 'Задержка дыхания после выдоха') {
                 startHoldPhase('Задержка дыхания после выдоха', remainingTime, smallSize, exhalationColor, nextCallback);
             } else if (currentPhase === 'Глубокий вдох') {
-                startPhase('Глубокий вдох', remainingTime, largeSize, inhalationColor, nextCallback);
+                startPhase('Глубокий вдох', largeSize, inhalationColor, nextCallback);
             } else if (currentPhase === 'Задержка после глубокого вдоха') {
                 startHoldPhase('Задержка после глубокого вдоха', remainingTime, largeSize, inhalationColor, nextCallback);
             } else if (currentPhase === 'Финальный выдох') {
-                startPhase('Финальный выдох', remainingTime, smallSize, exhalationColor, nextCallback);
+                startPhase('Финальный выдох', smallSize, exhalationColor, nextCallback);
             }
         }
 
         function performCycle(index, callback) {
-            startPhase('ВДОХ', inhalationTime, largeSize, inhalationColor, () => {
-                startPhase('ВЫДОХ', exhalationTime, smallSize, exhalationColor, () => {
-                    updateProgressbar(index + 1);
-                    if (index < 29) {
-                        performCycle(index + 1, callback);
-                    } else {
-                        hideProgressbar();
-                        callback();
-                    }
-                });
-            });
+            if (index === 0) {
+                breathingAudio.currentTime = 0; // Начинаем с начала файла
+                breathingAudio.play().catch(e => console.error('Breathing audio play failed:', e));
+                showProgressbar();
+            }
+            startPhase(index % 2 === 0 ? 'ВДОХ' : 'ВЫДОХ', 
+                      index % 2 === 0 ? largeSize : smallSize, 
+                      index % 2 === 0 ? inhalationColor : exhalationColor, 
+                      () => {
+                          updateProgressbar(index + 1);
+                          if (index < 29) {
+                              performCycle(index + 1, callback);
+                          } else {
+                              breathingAudio.pause();
+                              hideProgressbar();
+                              callback();
+                          }
+                      });
         }
 
         function performBreathHold() {
-            const deepInhalationTime = Math.round(inhalationTime * 1.2);
-            const deepExhalationTime = Math.round(exhalationTime * 1.2);
-            startPhase('ВЫДОХ', exhalationTime, smallSize, exhalationColor, () => {
+            const deepInhalationTime = Math.round(PHASE_DURATION * 1.2);
+            const deepExhalationTime = Math.round(PHASE_DURATION * 1.2);
+            startPhase('ВЫДОХ', smallSize, exhalationColor, () => {
                 breathingAudio.pause();
                 startHoldPhase('Задержка дыхания после выдоха', currentBreathHoldTime, smallSize, exhalationColor, () => {
-                    startPhase('Глубокий вдох', deepInhalationTime, largeSize, inhalationColor, () => {
+                    startPhase('Глубокий вдох', largeSize, inhalationColor, () => {
                         startHoldPhase('Задержка после глубокого вдоха', 15, largeSize, inhalationColor, () => {
-                            startPhase('Финальный выдох', deepExhalationTime, smallSize, exhalationColor, () => {
+                            startPhase('Финальный выдох', smallSize, exhalationColor, () => {
                                 endRound();
                             });
                         });
@@ -596,8 +573,6 @@
         }
 
         function startSession() {
-            inhalationTime = parseInt(document.getElementById('inhalationTime').value) || 2;
-            exhalationTime = parseInt(document.getElementById('exhalationTime').value) || 2;
             initialBreathHoldTime = parseInt(document.getElementById('initialBreathHoldTime').value) || 60;
             numberOfRounds = parseInt(document.getElementById('numberOfRounds').value) || 3;
             currentBreathHoldTime = initialBreathHoldTime;
@@ -616,7 +591,7 @@
             startAudio.play().catch(e => console.error('Start audio play failed:', e));
             setTimeout(() => {
                 document.getElementById('circle').style.display = 'flex';
-                setCircleImmediate(largeSize, inhalationColor);
+                setCircle(largeSize, inhalationColor);
                 startRound();
             }, 17000);
         }
@@ -625,7 +600,7 @@
             currentRound++;
             if (currentRound < numberOfRounds) {
                 currentBreathHoldTime = Math.round(currentBreathHoldTime * 1.68);
-                setCircleImmediate(largeSize, inhalationColor);
+                setCircle(largeSize, inhalationColor);
                 startRound();
             } else {
                 document.getElementById('roundInfo').style.display = 'none';
