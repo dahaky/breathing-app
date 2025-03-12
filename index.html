@@ -379,13 +379,13 @@
             <button class="settingsButton" onclick="showSettings()">Настройки</button>
             <div class="toggle-container">
                 <label for="soundToggle">Включить звук</label>
-                <div class="toggle-switch">
+                <label class="toggle-switch">
                     <input type="checkbox" id="soundToggle" onchange="toggleSound()">
                     <span class="slider"></span>
-                </div>
+                </label>
             </div>
             <div class="circle-section">
-                <div class="circle" id="startButton" onclick="startSession()" style="display: none;">
+                <div class="circle" id="startButton" onclick="startSession()">
                     <div class="circle-content">
                         <div id="startText">Начать</div>
                     </div>
@@ -436,7 +436,7 @@
         const largeSize = 'min(75vw, 300px)';
         const inhalationColor = '#90CAF9'; // Цвет кнопки "Начать"
         const exhalationColor = '#2A2F3A'; // Цвет фона
-        const PHASE_DURATION = 1.88; // Вернули 1.88 секунды
+        const PHASE_DURATION = 1.88; // Оставляем 1.88 секунды
 
         let initialBreathHoldTime, numberOfRounds;
         let currentBreathHoldTime, currentCycle = 0, currentRound = 0;
@@ -466,14 +466,18 @@
 
         function toggleSound() {
             const toggle = document.getElementById('soundToggle');
+            const startButton = document.getElementById('startButton');
+            console.log('Toggle sound called, checked:', toggle.checked); // Отладка
             if (toggle.checked) {
+                console.log('Sound enabled, unlocking audio...');
                 unlockAudio();
-                document.getElementById('startButton').style.display = 'flex';
+                startButton.style.display = 'flex'; // Показываем кнопку "Начать"
                 document.getElementById('startText').innerHTML = 'Начать';
             } else {
+                console.log('Sound disabled');
                 soundEnabled = false;
-                document.getElementById('startButton').style.display = 'none';
-                document.getElementById('startText').innerHTML = 'Разблокируйте звук';
+                startButton.style.display = 'none'; // Скрываем кнопку "Начать"
+                document.getElementById('startText').innerHTML = 'Начать';
             }
         }
 
@@ -486,6 +490,9 @@
                 audio.addEventListener('error', (e) => console.error(`${audio.src} failed to load:`, e));
                 audio.load();
             });
+
+            // Изначально скрываем кнопку "Начать"
+            document.getElementById('startButton').style.display = 'none';
         };
 
         const sliders = ['initialBreathHoldTime', 'numberOfRounds'];
