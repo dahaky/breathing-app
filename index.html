@@ -72,6 +72,51 @@
             background-color: #28A745; /* Еще темнее при нажатии */
             transform: scale(0.98);
         }
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 1vw;
+            margin: 1vh 0;
+        }
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #34C759;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
         .settings {
             display: none;
             flex-direction: column;
@@ -191,6 +236,7 @@
             opacity: 1;
             transition: transform 0.3s ease;
             border-radius: 50%;
+            display: none; /* Скрыта до активации звука */
         }
         #startButton:hover {
             transform: scale(1.05);
@@ -331,10 +377,17 @@
         </div>
         <div class="initialView">
             <button class="settingsButton" onclick="showSettings()">Настройки</button>
+            <div class="toggle-container">
+                <label for="soundToggle">Включить звук</label>
+                <div class="toggle-switch">
+                    <input type="checkbox" id="soundToggle" onchange="toggleSound()">
+                    <span class="slider"></span>
+                </div>
+            </div>
             <div class="circle-section">
-                <div class="circle" id="startButton" onclick="startSession()">
+                <div class="circle" id="startButton" onclick="startSession()" style="display: none;">
                     <div class="circle-content">
-                        <div id="startText">Разблокировать звук и начать</div>
+                        <div id="startText">Начать</div>
                     </div>
                 </div>
             </div>
@@ -388,16 +441,16 @@
         let initialBreathHoldTime, numberOfRounds;
         let currentBreathHoldTime, currentCycle = 0, currentRound = 0;
         let isPaused = false, timerInterval, phaseTimeout, remainingTime, currentPhase, nextCallback;
+        let soundEnabled = false;
 
         const startAudio = document.getElementById('startAudio');
         const breathingAudio = document.getElementById('breathingAudio');
         const delayAudio = document.getElementById('delayAudio');
         const exhalationAudio = document.getElementById('exhalationAudio');
-        let audioContextUnlocked = false;
 
-        // Разблокировка аудио сразу после первого взаимодействия
+        // Разблокировка аудио при активации тумблера
         function unlockAudio() {
-            if (audioContextUnlocked) return;
+            if (soundEnabled) return;
             const audios = [startAudio, breathingAudio, delayAudio, exhalationAudio];
             audios.forEach(audio => {
                 audio.play().then(() => {
@@ -408,7 +461,20 @@
                     console.error(`Failed to unlock ${audio.id}:`, e);
                 });
             });
-            audioContextUnlocked = true;
+            soundEnabled = true;
+        }
+
+        function toggleSound() {
+            const toggle = document.getElementById('soundToggle');
+            if (toggle.checked) {
+                unlockAudio();
+                document.getElementById('startButton').style.display = 'flex';
+                document.getElementById('startText').innerHTML = 'Начать';
+            } else {
+                soundEnabled = false;
+                document.getElementById('startButton').style.display = 'none';
+                document.getElementById('startText').innerHTML = 'Разблокируйте звук';
+            }
         }
 
         window.onload = () => {
@@ -490,11 +556,13 @@
         }
 
         function playAudio(audio) {
-            audio.currentTime = 0;
-            audio.play().catch(e => {
-                console.error(`Failed to play ${audio.id}:`, e);
-                alert(`Не удалось воспроизвести ${audio.id}. Пожалуйста, убедитесь, что звук включен, проверьте доступность файла, или перезагрузите страницу.`);
-            });
+            if (soundEnabled) {
+                audio.currentTime = 0;
+                audio.play().catch(e => {
+                    console.error(`Failed to play ${audio.id}:`, e);
+                    alert(`Не удалось воспроизвести ${audio.id}. Пожалуйста, убедитесь, что звук включен, проверьте доступность файла, или перезагрузите страницу.`);
+                });
+            }
         }
 
         function startPhase(phaseName, circleSize, isInhalation, callback) {
@@ -606,13 +674,14 @@
         }
 
         function startSession() {
+            if (!soundEnabled) {
+                alert('Пожалуйста, включите звук с помощью тумблера.');
+                return;
+            }
             initialBreathHoldTime = parseInt(document.getElementById('initialBreathHoldTime').value) || 60;
             numberOfRounds = parseInt(document.getElementById('numberOfRounds').value) || 3;
             currentBreathHoldTime = initialBreathHoldTime;
             currentRound = 0;
-
-            // Разблокировка аудио после первого клика
-            unlockAudio();
 
             const container = document.getElementById('container');
             container.classList.remove('initial-visible');
