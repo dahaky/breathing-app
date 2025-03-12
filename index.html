@@ -166,7 +166,7 @@
             background-color: transparent;
             border: 3px solid #FFAB91;
             box-shadow: 0 0 20px rgba(255, 171, 145, 0.6);
-            transition: width 1.97s linear, height 1.97s linear, border-color 1.97s linear, box-shadow 1.97s linear, opacity 0.5s ease;
+            transition: width 1.88s linear, height 1.88s linear, border-color 1.88s linear, box-shadow 1.88s linear, opacity 0.5s ease;
             position: relative;
             display: flex;
             align-items: center;
@@ -228,7 +228,7 @@
             background-color: #81C784;
             width: 0;
             border-radius: 10px;
-            transition: width 1.97s linear;
+            transition: width 1.88s linear;
         }
         .ripple {
             position: absolute;
@@ -334,7 +334,7 @@
             <div class="circle-section">
                 <div class="circle" id="startButton" onclick="startSession()">
                     <div class="circle-content">
-                        <div id="startText">Начать</div>
+                        <div id="startText">Разблокировать звук и начать</div>
                     </div>
                 </div>
             </div>
@@ -383,7 +383,7 @@
         const largeSize = 'min(75vw, 300px)';
         const inhalationColor = '#90CAF9'; // Цвет кнопки "Начать"
         const exhalationColor = '#2A2F3A'; // Цвет фона
-        const PHASE_DURATION = 1.97; // Установлено 1.97 секунды для 118 секунд аудио (60 фаз)
+        const PHASE_DURATION = 1.88; // Вернули 1.88 секунды
 
         let initialBreathHoldTime, numberOfRounds;
         let currentBreathHoldTime, currentCycle = 0, currentRound = 0;
