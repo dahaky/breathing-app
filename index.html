@@ -51,71 +51,24 @@
         .container.initial-visible .initialView {
             display: flex;
         }
-        .settingsButton, button, .link-button {
-            width: min(85vw, 320px);
-            padding: clamp(12px, 2.5vh, 18px) clamp(25px, 5vw, 35px);
-            font-size: clamp(16px, 4.5vw, 22px);
+        .settingsButton {
+            width: min(80vw, 300px);
+            padding: clamp(10px, 2vh, 15px) clamp(20px, 4vw, 30px);
+            font-size: clamp(16px, 4vw, 20px);
             font-weight: bold;
             cursor: pointer;
-            background-color: #34C759; /* Зеленый Telegram */
+            background-color: #0088CC;
             color: #FFFFFF;
             border: none;
-            border-radius: 14px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
             transition: background-color 0.3s ease, transform 0.2s ease;
         }
-        .settingsButton:hover, button:hover, .link-button:hover {
-            background-color: #2DA44E; /* Темнее зеленый при наведении */
-            transform: scale(1.02);
+        .settingsButton:hover {
+            background-color: #0099DD;
         }
-        .settingsButton:active, button:active, .link-button:active {
-            background-color: #28A745; /* Еще темнее при нажатии */
+        .settingsButton:active {
+            background-color: #0077BB;
             transform: scale(0.98);
-        }
-        .toggle-container {
-            display: flex;
-            align-items: center;
-            gap: 1vw;
-            margin: 1vh 0;
-        }
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 24px;
-        }
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: 0.4s;
-            border-radius: 24px;
-        }
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: 0.4s;
-            border-radius: 50%;
-        }
-        input:checked + .slider {
-            background-color: #34C759;
-        }
-        input:checked + .slider:before {
-            transform: translateX(26px);
         }
         .settings {
             display: none;
@@ -159,12 +112,26 @@
             background: none;
             border: none;
             color: #F5F5F5;
-            font-size: clamp(18px, 5vw, 24px);
+            font-size: clamp(16px, 4vw, 22px);
             cursor: pointer;
             transition: transform 0.2s ease;
         }
         .closeSettings:hover {
             transform: scale(1.1);
+        }
+        button {
+            margin: 0.5vh 1vw;
+            padding: clamp(6px, 1vh, 12px) clamp(10px, 3vw, 20px);
+            font-size: clamp(12px, 3vw, 16px);
+            cursor: pointer;
+            background-color: #90CAF9;
+            color: #F5F5F5;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #64B5F6;
         }
         #breathingSection {
             display: none;
@@ -186,15 +153,6 @@
             font-size: clamp(12px, 3vw, 16px);
             margin-bottom: 1vh;
         }
-        #preparationText {
-            font-size: clamp(14px, 4vw, 18px);
-            margin: 2vh 0;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
-        .container.preparing #preparationText {
-            opacity: 1;
-        }
         .circle-section {
             position: relative;
             display: flex;
@@ -211,7 +169,7 @@
             background-color: transparent;
             border: 3px solid #FFAB91;
             box-shadow: 0 0 20px rgba(255, 171, 145, 0.6);
-            transition: width 1.88s linear, height 1.88s linear, border-color 1.88s linear, box-shadow 1.88s linear, opacity 0.5s ease;
+            transition: width 1.95s ease, height 1.95s ease, border-color 1.95s ease, box-shadow 1.95s ease, opacity 0.5s ease;
             position: relative;
             display: flex;
             align-items: center;
@@ -219,24 +177,14 @@
             opacity: 0;
             z-index: 1;
         }
-        .circle.inhalation {
-            border-color: #90CAF9; /* Цвет кнопки "Начать" */
-            box-shadow: 0 0 20px rgba(144, 202, 249, 0.6);
-        }
-        .circle.exhalation {
-            border-color: #2A2F3A; /* Цвет фона */
-            box-shadow: 0 0 20px rgba(42, 47, 58, 0.6); /* Соответствующий shadow */
-        }
         #startButton {
-            width: min(80vw, 320px);
-            height: min(80vw, 320px);
+            width: min(75vw, 300px);
+            height: min(75vw, 300px);
             border: 3px solid #90CAF9;
             box-shadow: 0 0 20px rgba(144, 202, 249, 0.6);
             cursor: pointer;
             opacity: 1;
             transition: transform 0.3s ease;
-            border-radius: 50%;
-            display: none; /* Скрыта до активации звука */
         }
         #startButton:hover {
             transform: scale(1.05);
@@ -274,7 +222,7 @@
             background-color: #81C784;
             width: 0;
             border-radius: 10px;
-            transition: width 1.88s linear;
+            transition: width 1.95s ease;
         }
         .ripple {
             position: absolute;
@@ -336,29 +284,29 @@
         .link-button {
             display: inline-block;
             margin: 0.5vh 1vw;
-            padding: clamp(12px, 2.5vh, 18px) clamp(25px, 5vw, 35px);
-            font-size: clamp(16px, 4.5vw, 22px);
-            background-color: #007AFF; /* Синий Telegram */
-            color: #FFFFFF;
+            padding: clamp(6px, 1vh, 12px) clamp(10px, 3vw, 20px);
+            font-size: clamp(12px, 3vw, 16px);
+            background-color: #90CAF9;
+            color: #F5F5F5;
             text-decoration: none;
-            border-radius: 14px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
             transition: background-color 0.3s ease;
         }
         .link-button:hover {
-            background-color: #005BB5; /* Темнее синий при наведении */
+            background-color: #64B5F6;
         }
         @media (max-width: 400px) and (orientation: portrait) {
             h1 { font-size: clamp(14px, 5vw, 20px); }
-            .settingsButton, button, .link-button { 
+            .settingsButton { 
                 width: min(90vw, 280px); 
-                padding: clamp(10px, 2vh, 16px) clamp(20px, 4vw, 30px); 
+                padding: clamp(8px, 1.5vh, 12px) clamp(15px, 3vw, 25px); 
                 font-size: clamp(14px, 3.5vw, 18px); 
             }
-            #startButton { width: min(85vw, 280px); height: min(85vw, 280px); }
+            #startButton { width: min(80vw, 260px); height: min(80vw, 260px); }
             #startText { font-size: clamp(18px, 6vw, 28px); }
             .settings input[type="range"] { width: clamp(100px, 20vw, 140px); }
             .settings span { font-size: clamp(10px, 2.5vw, 14px); }
+            button, .link-button { padding: clamp(5px, 1vh, 10px) clamp(8px, 2vw, 15px); font-size: clamp(10px, 2.5vw, 14px); }
             #roundInfo { font-size: clamp(10px, 2.5vw, 14px); }
             .progress-bar { height: clamp(6px, 1.5vw, 10px); }
             #instruction { font-size: clamp(12px, 4vw, 16px); }
@@ -373,17 +321,9 @@
         <h1>Дыхательная практика Вима Хоффа</h1>
         <div class="text-section">
             <div id="roundInfo"></div>
-            <div id="preparationText">Готовимся к практике. Сядьте или лягте поудобнее и расслабьтесь</div>
         </div>
         <div class="initialView">
             <button class="settingsButton" onclick="showSettings()">Настройки</button>
-            <div class="toggle-container">
-                <label for="soundToggle">Включить звук</label>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="soundToggle" onchange="toggleSound()">
-                    <span class="slider"></span>
-                </label>
-            </div>
             <div class="circle-section">
                 <div class="circle" id="startButton" onclick="startSession()">
                     <div class="circle-content">
@@ -426,73 +366,34 @@
         </div>
     </div>
 
-    <audio id="startAudio" src="/breathing-app/start.MP3" preload="auto"></audio>
-    <audio id="breathingAudio" src="/breathing-app/breathing.MP3" preload="auto"></audio>
-    <audio id="delayAudio" src="/breathing-app/delay.MP3" preload="auto" loop></audio>
-    <audio id="exhalationAudio" src="/breathing-app/exhalation.MP3" preload="auto"></audio>
+    <audio id="startAudio" src="/breathing-app/start.MP3"></audio>
+    <audio id="breathingAudio" src="/breathing-app/breathing.MP3"></audio>
+    <audio id="delayAudio" src="/breathing-app/delay.MP3" loop></audio>
+    <audio id="exhalationAudio" src="/breathing-app/exhalation.MP3"></audio>
 
     <script>
         const smallSize = 'min(50vw, 200px)';
         const largeSize = 'min(75vw, 300px)';
-        const inhalationColor = '#90CAF9'; // Цвет кнопки "Начать"
-        const exhalationColor = '#2A2F3A'; // Цвет фона
-        const PHASE_DURATION = 1.88; // Оставляем 1.88 секунды
+        const inhalationColor = '#66BB6A';
+        const exhalationColor = '#FFAB91';
+        const PHASE_DURATION = 1.95; // 117 секунд / 60 фаз = 1.95 секунды на вдох/выдох
 
         let initialBreathHoldTime, numberOfRounds;
         let currentBreathHoldTime, currentCycle = 0, currentRound = 0;
         let isPaused = false, timerInterval, phaseTimeout, remainingTime, currentPhase, nextCallback;
-        let soundEnabled = false;
 
         const startAudio = document.getElementById('startAudio');
         const breathingAudio = document.getElementById('breathingAudio');
         const delayAudio = document.getElementById('delayAudio');
         const exhalationAudio = document.getElementById('exhalationAudio');
 
-        // Разблокировка аудио при активации тумблера
-        function unlockAudio() {
-            if (soundEnabled) return;
-            const audios = [startAudio, breathingAudio, delayAudio, exhalationAudio];
-            audios.forEach(audio => {
-                audio.play().then(() => {
-                    audio.pause();
-                    audio.currentTime = 0;
-                    console.log(`${audio.id} unlocked successfully`);
-                }).catch(e => {
-                    console.error(`Failed to unlock ${audio.id}:`, e);
-                });
-            });
-            soundEnabled = true;
-        }
-
-        function toggleSound() {
-            const toggle = document.getElementById('soundToggle');
-            const startButton = document.getElementById('startButton');
-            console.log('Toggle sound called, checked:', toggle.checked); // Отладка
-            if (toggle.checked) {
-                console.log('Sound enabled, unlocking audio...');
-                unlockAudio();
-                startButton.style.display = 'flex'; // Показываем кнопку "Начать"
-                document.getElementById('startText').innerHTML = 'Начать';
-            } else {
-                console.log('Sound disabled');
-                soundEnabled = false;
-                startButton.style.display = 'none'; // Скрываем кнопку "Начать"
-                document.getElementById('startText').innerHTML = 'Начать';
-            }
-        }
-
         window.onload = () => {
             console.log('Checking audio files...');
             [startAudio, breathingAudio, delayAudio, exhalationAudio].forEach(audio => {
-                audio.addEventListener('loadeddata', () => {
-                    console.log(`${audio.src} loaded successfully, duration: ${audio.duration}s`);
-                });
+                audio.addEventListener('loadeddata', () => console.log(`${audio.src} loaded successfully`));
                 audio.addEventListener('error', (e) => console.error(`${audio.src} failed to load:`, e));
                 audio.load();
             });
-
-            // Изначально скрываем кнопку "Начать"
-            document.getElementById('startButton').style.display = 'none';
         };
 
         const sliders = ['initialBreathHoldTime', 'numberOfRounds'];
@@ -512,13 +413,13 @@
             document.getElementById('settings').style.height = '0';
         }
 
-        function setCircle(size, isInhalation) {
+        function setCircle(size, color) {
             const circle = document.getElementById('circle');
-            circle.style.transition = `width ${PHASE_DURATION}s linear, height ${PHASE_DURATION}s linear, border-color ${PHASE_DURATION}s linear, box-shadow ${PHASE_DURATION}s linear, opacity 0.5s ease`;
+            circle.style.transition = `width ${PHASE_DURATION}s ease, height ${PHASE_DURATION}s ease, border-color ${PHASE_DURATION}s ease, box-shadow ${PHASE_DURATION}s ease, opacity 0.5s ease`;
             circle.style.width = size;
             circle.style.height = size;
-            circle.classList.remove('inhalation', 'exhalation');
-            circle.classList.add(isInhalation ? 'inhalation' : 'exhalation');
+            circle.style.borderColor = color;
+            circle.style.boxShadow = `0 0 20px ${color === inhalationColor ? 'rgba(102, 187, 106, 0.6)' : 'rgba(255, 171, 145, 0.6)'}`;
             circle.style.opacity = '1';
             circle.style.display = 'flex';
         }
@@ -559,35 +460,25 @@
         function updateProgressbar(cycleNumber) {
             const progress = (cycleNumber / 60) * 100; // 60 фаз (30 вдохов + 30 выдохов)
             document.getElementById('progressBar').style.width = `${progress}%`;
-            document.getElementById('progressBar').style.transition = `width ${PHASE_DURATION}s linear`;
+            document.getElementById('progressBar').style.transition = `width ${PHASE_DURATION}s ease`;
         }
 
-        function playAudio(audio) {
-            if (soundEnabled) {
-                audio.currentTime = 0;
-                audio.play().catch(e => {
-                    console.error(`Failed to play ${audio.id}:`, e);
-                    alert(`Не удалось воспроизвести ${audio.id}. Пожалуйста, убедитесь, что звук включен, проверьте доступность файла, или перезагрузите страницу.`);
-                });
-            }
-        }
-
-        function startPhase(phaseName, circleSize, isInhalation, callback) {
+        function startPhase(phaseName, circleSize, circleColor, callback) {
             if (isPaused) return;
-            console.log(`Starting phase: ${phaseName} at ${new Date().toISOString()}`);
+            console.log(`Starting phase: ${phaseName}`);
             setInstruction(phaseName);
-            setCircle(circleSize, isInhalation);
+            setCircle(circleSize, circleColor);
             currentPhase = phaseName;
             phaseTimeout = window.setTimeout(() => {
                 if (!isPaused) callback();
             }, PHASE_DURATION * 1000);
         }
 
-        function startHoldPhase(phaseName, time, circleSize, isInhalation, callback) {
+        function startHoldPhase(phaseName, time, circleSize, circleColor, callback) {
             if (isPaused) return;
-            console.log(`Starting hold phase: ${phaseName} at ${new Date().toISOString()}`);
+            console.log(`Starting hold phase: ${phaseName}`);
             setInstruction(phaseName);
-            setCircle(circleSize, isInhalation);
+            setCircle(circleSize, circleColor);
             const ripple = document.getElementById('rippleEffect');
             ripple.classList.add('active');
             let remaining = time;
@@ -598,14 +489,15 @@
                 callback();
             };
             setTimer(remaining);
-            playAudio(delayAudio);
+            delayAudio.play().catch(e => console.error('Delay audio play failed:', e));
             timerInterval = window.setInterval(() => {
                 remaining--;
                 if (remaining >= 0 && !isPaused) {
                     setTimer(remaining);
                     if (remaining === 7) {
                         delayAudio.pause();
-                        playAudio(exhalationAudio);
+                        exhalationAudio.currentTime = 0;
+                        exhalationAudio.play().catch(e => console.error('Exhalation audio play failed:', e));
                     }
                 }
             }, 1000);
@@ -622,29 +514,30 @@
 
         function resumePhase() {
             if (currentPhase === 'ВДОХ') {
-                startPhase('ВДОХ', largeSize, true, nextCallback);
+                startPhase('ВДОХ', largeSize, inhalationColor, nextCallback);
             } else if (currentPhase === 'ВЫДОХ') {
-                startPhase('ВЫДОХ', smallSize, false, nextCallback);
+                startPhase('ВЫДОХ', smallSize, exhalationColor, nextCallback);
             } else if (currentPhase === 'Задержка дыхания после выдоха') {
-                startHoldPhase('Задержка дыхания после выдоха', remainingTime, smallSize, false, nextCallback);
+                startHoldPhase('Задержка дыхания после выдоха', remainingTime, smallSize, exhalationColor, nextCallback);
             } else if (currentPhase === 'Глубокий вдох') {
-                startPhase('Глубокий вдох', largeSize, true, nextCallback);
+                startPhase('Глубокий вдох', largeSize, inhalationColor, nextCallback);
             } else if (currentPhase === 'Задержка после глубокого вдоха') {
-                startHoldPhase('Задержка после глубокого вдоха', remainingTime, largeSize, true, nextCallback);
+                startHoldPhase('Задержка после глубокого вдоха', remainingTime, largeSize, inhalationColor, nextCallback);
             } else if (currentPhase === 'Финальный выдох') {
-                startPhase('Финальный выдох', smallSize, false, nextCallback);
+                startPhase('Финальный выдох', smallSize, exhalationColor, nextCallback);
             }
         }
 
         function performCycle(index, callback) {
             if (index === 0) {
-                playAudio(breathingAudio);
+                breathingAudio.currentTime = 0; // Начинаем с начала файла
+                breathingAudio.play().catch(e => console.error('Breathing audio play failed:', e));
                 showProgressbar();
             }
             const isInhalation = index % 2 === 0;
             startPhase(isInhalation ? 'ВДОХ' : 'ВЫДОХ', 
                       isInhalation ? largeSize : smallSize, 
-                      isInhalation, 
+                      isInhalation ? inhalationColor : exhalationColor, 
                       () => {
                           updateProgressbar(index + 1);
                           if (index < 59) { // 60 фаз: 0-59 (30 вдохов + 30 выдохов)
@@ -660,12 +553,12 @@
         function performBreathHold() {
             const deepInhalationTime = Math.round(PHASE_DURATION * 1.2);
             const deepExhalationTime = Math.round(PHASE_DURATION * 1.2);
-            startPhase('ВЫДОХ', smallSize, false, () => {
+            startPhase('ВЫДОХ', smallSize, exhalationColor, () => {
                 breathingAudio.pause();
-                startHoldPhase('Задержка дыхания после выдоха', currentBreathHoldTime, smallSize, false, () => {
-                    startPhase('Глубокий вдох', largeSize, true, () => {
-                        startHoldPhase('Задержка после глубокого вдоха', 15, largeSize, true, () => {
-                            startPhase('Финальный выдох', smallSize, false, () => {
+                startHoldPhase('Задержка дыхания после выдоха', currentBreathHoldTime, smallSize, exhalationColor, () => {
+                    startPhase('Глубокий вдох', largeSize, inhalationColor, () => {
+                        startHoldPhase('Задержка после глубокого вдоха', 15, largeSize, inhalationColor, () => {
+                            startPhase('Финальный выдох', smallSize, exhalationColor, () => {
                                 endRound();
                             });
                         });
@@ -681,10 +574,6 @@
         }
 
         function startSession() {
-            if (!soundEnabled) {
-                alert('Пожалуйста, включите звук с помощью тумблера.');
-                return;
-            }
             initialBreathHoldTime = parseInt(document.getElementById('initialBreathHoldTime').value) || 60;
             numberOfRounds = parseInt(document.getElementById('numberOfRounds').value) || 3;
             currentBreathHoldTime = initialBreathHoldTime;
@@ -692,29 +581,27 @@
 
             const container = document.getElementById('container');
             container.classList.remove('initial-visible');
-            container.classList.add('preparing'); // Добавляем класс для подготовки
-            document.getElementById('preparationText').style.display = 'block';
+            container.classList.add('breathing-visible');
+            document.getElementById('breathingSection').style.display = 'flex';
+            document.getElementById('pauseButton').style.display = 'inline';
+            document.getElementById('resetButton').style.display = 'inline';
+            document.getElementById('circle').style.display = 'none';
 
             console.log('Starting session with start.MP3');
-            playAudio(startAudio);
+            startAudio.currentTime = 0;
+            startAudio.play().catch(e => console.error('Start audio play failed:', e));
             setTimeout(() => {
-                container.classList.remove('preparing');
-                container.classList.add('breathing-visible');
-                document.getElementById('breathingSection').style.display = 'flex';
-                document.getElementById('pauseButton').style.display = 'inline';
-                document.getElementById('resetButton').style.display = 'inline';
                 document.getElementById('circle').style.display = 'flex';
-                document.getElementById('preparationText').style.display = 'none';
-                setCircle(largeSize, true);
+                setCircle(largeSize, inhalationColor);
                 startRound();
-            }, 17000); // Синхронизация с окончанием start.mp3
+            }, 17000);
         }
 
         function endRound() {
             currentRound++;
             if (currentRound < numberOfRounds) {
                 currentBreathHoldTime = Math.round(currentBreathHoldTime * 1.68);
-                setCircle(largeSize, true);
+                setCircle(largeSize, inhalationColor);
                 startRound();
             } else {
                 document.getElementById('roundInfo').style.display = 'none';
@@ -752,14 +639,13 @@
             delayAudio.pause();
             exhalationAudio.pause();
             const container = document.getElementById('container');
-            container.classList.remove('breathing-visible', 'preparing');
+            container.classList.remove('breathing-visible');
             container.classList.add('initial-visible');
             document.getElementById('breathingSection').style.display = 'none';
             document.getElementById('completionMessage').style.display = 'none';
             document.getElementById('roundInfo').style.display = 'block';
             document.getElementById('pauseButton').style.display = 'none';
             document.getElementById('resetButton').style.display = 'none';
-            document.getElementById('preparationText').style.display = 'block';
             currentCycle = 0;
             currentRound = 0;
             isPaused = false;
