@@ -169,7 +169,7 @@
             background-color: transparent;
             border: 3px solid #FFAB91;
             box-shadow: 0 0 20px rgba(255, 171, 145, 0.6);
-            transition: width 1.95s ease, height 1.95s ease, border-color 1.95s ease, box-shadow 1.95s ease, opacity 0.5s ease;
+            transition: width 1.9s step-end, height 1.9s step-end, border-color 1.9s step-end, box-shadow 1.9s step-end, opacity 0.5s ease;
             position: relative;
             display: flex;
             align-items: center;
@@ -222,7 +222,7 @@
             background-color: #81C784;
             width: 0;
             border-radius: 10px;
-            transition: width 1.95s ease;
+            transition: width 1.9s step-end;
         }
         .ripple {
             position: absolute;
@@ -376,7 +376,7 @@
         const largeSize = 'min(75vw, 300px)';
         const inhalationColor = '#66BB6A';
         const exhalationColor = '#FFAB91';
-        const PHASE_DURATION = 1.95; // 117 секунд / 60 фаз = 1.95 секунды на вдох/выдох
+        const PHASE_DURATION = 1.9; // Уменьшено до 1.9 секунд для синхронизации
 
         let initialBreathHoldTime, numberOfRounds;
         let currentBreathHoldTime, currentCycle = 0, currentRound = 0;
@@ -390,7 +390,9 @@
         window.onload = () => {
             console.log('Checking audio files...');
             [startAudio, breathingAudio, delayAudio, exhalationAudio].forEach(audio => {
-                audio.addEventListener('loadeddata', () => console.log(`${audio.src} loaded successfully`));
+                audio.addEventListener('loadeddata', () => {
+                    console.log(`${audio.src} loaded successfully, duration: ${audio.duration}s`);
+                });
                 audio.addEventListener('error', (e) => console.error(`${audio.src} failed to load:`, e));
                 audio.load();
             });
@@ -415,7 +417,7 @@
 
         function setCircle(size, color) {
             const circle = document.getElementById('circle');
-            circle.style.transition = `width ${PHASE_DURATION}s ease, height ${PHASE_DURATION}s ease, border-color ${PHASE_DURATION}s ease, box-shadow ${PHASE_DURATION}s ease, opacity 0.5s ease`;
+            circle.style.transition = `width ${PHASE_DURATION}s step-end, height ${PHASE_DURATION}s step-end, border-color ${PHASE_DURATION}s step-end, box-shadow ${PHASE_DURATION}s step-end, opacity 0.5s ease`;
             circle.style.width = size;
             circle.style.height = size;
             circle.style.borderColor = color;
@@ -460,12 +462,12 @@
         function updateProgressbar(cycleNumber) {
             const progress = (cycleNumber / 60) * 100; // 60 фаз (30 вдохов + 30 выдохов)
             document.getElementById('progressBar').style.width = `${progress}%`;
-            document.getElementById('progressBar').style.transition = `width ${PHASE_DURATION}s ease`;
+            document.getElementById('progressBar').style.transition = `width ${PHASE_DURATION}s step-end`;
         }
 
         function startPhase(phaseName, circleSize, circleColor, callback) {
             if (isPaused) return;
-            console.log(`Starting phase: ${phaseName}`);
+            console.log(`Starting phase: ${phaseName} at ${new Date().toISOString()}`);
             setInstruction(phaseName);
             setCircle(circleSize, circleColor);
             currentPhase = phaseName;
@@ -476,7 +478,7 @@
 
         function startHoldPhase(phaseName, time, circleSize, circleColor, callback) {
             if (isPaused) return;
-            console.log(`Starting hold phase: ${phaseName}`);
+            console.log(`Starting hold phase: ${phaseName} at ${new Date().toISOString()}`);
             setInstruction(phaseName);
             setCircle(circleSize, circleColor);
             const ripple = document.getElementById('rippleEffect');
