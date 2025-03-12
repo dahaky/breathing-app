@@ -458,7 +458,7 @@
         }
 
         function updateProgressbar(cycleNumber) {
-            const progress = (cycleNumber / 30) * 100;
+            const progress = (cycleNumber / 60) * 100; // 60 фаз (30 вдохов + 30 выдохов)
             document.getElementById('progressBar').style.width = `${progress}%`;
             document.getElementById('progressBar').style.transition = `width ${PHASE_DURATION}s ease`;
         }
@@ -534,12 +534,13 @@
                 breathingAudio.play().catch(e => console.error('Breathing audio play failed:', e));
                 showProgressbar();
             }
-            startPhase(index % 2 === 0 ? 'ВДОХ' : 'ВЫДОХ', 
-                      index % 2 === 0 ? largeSize : smallSize, 
-                      index % 2 === 0 ? inhalationColor : exhalationColor, 
+            const isInhalation = index % 2 === 0;
+            startPhase(isInhalation ? 'ВДОХ' : 'ВЫДОХ', 
+                      isInhalation ? largeSize : smallSize, 
+                      isInhalation ? inhalationColor : exhalationColor, 
                       () => {
                           updateProgressbar(index + 1);
-                          if (index < 29) {
+                          if (index < 59) { // 60 фаз: 0-59 (30 вдохов + 30 выдохов)
                               performCycle(index + 1, callback);
                           } else {
                               breathingAudio.pause();
