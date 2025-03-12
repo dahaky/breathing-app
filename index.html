@@ -166,7 +166,7 @@
             background-color: transparent;
             border: 3px solid #FFAB91;
             box-shadow: 0 0 20px rgba(255, 171, 145, 0.6);
-            transition: width 1.8s linear, height 1.8s linear, border-color 1.8s linear, box-shadow 1.8s linear, opacity 0.5s ease;
+            transition: width 1.5s linear, height 1.5s linear, border-color 1.5s linear, box-shadow 1.5s linear, opacity 0.5s ease;
             position: relative;
             display: flex;
             align-items: center;
@@ -228,7 +228,7 @@
             background-color: #81C784;
             width: 0;
             border-radius: 10px;
-            transition: width 1.8s linear;
+            transition: width 1.5s linear;
         }
         .ripple {
             position: absolute;
@@ -373,17 +373,17 @@
         </div>
     </div>
 
-    <audio id="startAudio" src="/breathing-app/start.MP3"></audio>
-    <audio id="breathingAudio" src="/breathing-app/breathing.MP3"></audio>
-    <audio id="delayAudio" src="/breathing-app/delay.MP3" loop></audio>
-    <audio id="exhalationAudio" src="/breathing-app/exhalation.MP3"></audio>
+    <audio id="startAudio" src="/breathing-app/start.MP3" preload="auto"></audio>
+    <audio id="breathingAudio" src="/breathing-app/breathing.MP3" preload="auto"></audio>
+    <audio id="delayAudio" src="/breathing-app/delay.MP3" preload="auto" loop></audio>
+    <audio id="exhalationAudio" src="/breathing-app/exhalation.MP3" preload="auto"></audio>
 
     <script>
         const smallSize = 'min(50vw, 200px)';
         const largeSize = 'min(75vw, 300px)';
         const inhalationColor = '#90CAF9'; // Цвет кнопки "Начать"
         const exhalationColor = '#2A2F3A'; // Цвет фона
-        const PHASE_DURATION = 1.8; // Установлено 1.8 секунды
+        const PHASE_DURATION = 1.5; // 1.5 секунды на вдох, 1.5 секунды на выдох
 
         let initialBreathHoldTime, numberOfRounds;
         let currentBreathHoldTime, currentCycle = 0, currentRound = 0;
@@ -542,7 +542,11 @@
                 breathingAudio.currentTime = 0; // Начинаем с начала файла
                 breathingAudio.play().catch(e => {
                     console.error('Breathing audio play failed:', e);
-                    alert('Не удалось запустить аудио. Пожалуйста, попробуйте еще раз нажать "Начать".');
+                    alert('Не удалось запустить аудио breathing.mp3. Пожалуйста, попробуйте еще раз нажать "Начать". Если проблема сохраняется, убедитесь, что звук включен и путь к файлу верен.');
+                    // Попытка повторного запуска
+                    setTimeout(() => {
+                        breathingAudio.play().catch(e => console.error('Second attempt failed:', e));
+                    }, 1000);
                 });
                 showProgressbar();
             }
