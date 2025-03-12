@@ -38,7 +38,7 @@
         }
         h1 {
             margin: 1vh 0;
-            font-size: clamp(16px, 5vw, 24px);
+            font-size: clamp(18px, 6vw, 28px);
         }
         .initialView {
             display: none;
@@ -46,23 +46,29 @@
             align-items: center;
             justify-content: center;
             flex-grow: 1;
+            gap: 2vh;
         }
         .container.initial-visible .initialView {
             display: flex;
         }
         .settingsButton {
-            margin: 1vh 0;
-            padding: clamp(6px, 1vh, 12px) clamp(10px, 3vw, 20px);
-            font-size: clamp(10px, 3vw, 16px);
+            width: min(80vw, 300px);
+            padding: clamp(10px, 2vh, 15px) clamp(20px, 4vw, 30px);
+            font-size: clamp(16px, 4vw, 20px);
+            font-weight: bold;
             cursor: pointer;
-            background-color: #90CAF9;
-            color: #F5F5F5;
+            background-color: #0088CC;
+            color: #FFFFFF;
             border: none;
-            border-radius: 5px;
-            transition: background-color 0.3s;
+            border-radius: 10px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
         }
         .settingsButton:hover {
-            background-color: #64B5F6;
+            background-color: #0099DD;
+        }
+        .settingsButton:active {
+            background-color: #0077BB;
+            transform: scale(0.98);
         }
         .settings {
             display: none;
@@ -72,32 +78,32 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            background-color: #000000; /* Черный фон */
-            opacity: 1; /* Непрозрачность */
-            padding: 1vh 0;
+            background-color: #000000;
+            opacity: 1;
+            padding: 2vh 0;
             box-sizing: border-box;
             height: 0;
             overflow: hidden;
-            transition: height 0.5s;
-            z-index: 10; /* Чтобы перекрывать другие элементы */
+            transition: height 0.5s ease;
+            z-index: 10;
         }
         .container.initial-visible .settings {
             display: flex;
         }
         .settings div {
-            margin: 1vh 0;
+            margin: 1.5vh 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            width: min(80vw, 300px);
+            width: min(85vw, 320px);
         }
         .settings input[type="range"] {
             margin-left: 2vw;
-            width: clamp(100px, 20vw, 150px);
+            width: clamp(120px, 25vw, 180px);
         }
         .settings span {
             margin-left: 1vw;
-            font-size: clamp(10px, 3vw, 14px);
+            font-size: clamp(12px, 3vw, 16px);
         }
         .closeSettings {
             position: absolute;
@@ -106,19 +112,23 @@
             background: none;
             border: none;
             color: #F5F5F5;
-            font-size: clamp(12px, 4vw, 18px);
+            font-size: clamp(16px, 4vw, 22px);
             cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .closeSettings:hover {
+            transform: scale(1.1);
         }
         button {
             margin: 0.5vh 1vw;
             padding: clamp(6px, 1vh, 12px) clamp(10px, 3vw, 20px);
-            font-size: clamp(10px, 3vw, 16px);
+            font-size: clamp(12px, 3vw, 16px);
             cursor: pointer;
             background-color: #90CAF9;
             color: #F5F5F5;
             border: none;
             border-radius: 5px;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s ease;
         }
         button:hover {
             background-color: #64B5F6;
@@ -140,7 +150,7 @@
             text-align: center;
         }
         #roundInfo {
-            font-size: clamp(10px, 3vw, 14px);
+            font-size: clamp(12px, 3vw, 16px);
             margin-bottom: 1vh;
         }
         .circle-section {
@@ -159,7 +169,7 @@
             background-color: transparent;
             border: 3px solid #FFAB91;
             box-shadow: 0 0 20px rgba(255, 171, 145, 0.6);
-            transition: width 0s, height 0s, border-color 0s, box-shadow 0s, opacity 0.5s;
+            transition: width 0.5s ease, height 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease, opacity 0.5s ease;
             position: relative;
             display: flex;
             align-items: center;
@@ -174,10 +184,13 @@
             box-shadow: 0 0 20px rgba(144, 202, 249, 0.6);
             cursor: pointer;
             opacity: 1;
-            transition: transform 0.3s;
+            transition: transform 0.3s ease;
         }
         #startButton:hover {
             transform: scale(1.05);
+        }
+        #startButton:active {
+            transform: scale(0.98);
         }
         .circle-content {
             display: flex;
@@ -190,13 +203,13 @@
             height: 100%;
         }
         #startText {
-            font-size: clamp(20px, 8vw, 32px);
+            font-size: clamp(22px, 8vw, 36px);
             font-weight: bold;
             color: #F5F5F5;
         }
         .progress-bar {
             width: min(80%, 160px);
-            height: clamp(10px, 2vw, 15px);
+            height: clamp(8px, 2vw, 12px);
             background-color: #4A5366;
             border-radius: 10px;
             display: none;
@@ -209,7 +222,7 @@
             background-color: #81C784;
             width: 0;
             border-radius: 10px;
-            transition: width 0.5s;
+            transition: width 0.5s ease;
         }
         .ripple {
             position: absolute;
@@ -221,26 +234,26 @@
             z-index: 0;
         }
         .ripple.active {
-            animation: ripple 1s infinite;
+            animation: ripple 1s infinite ease;
         }
         @keyframes ripple {
             0% { width: 0; height: 0; opacity: 1; }
             100% { width: min(75vw, 300px); height: min(75vw, 300px); opacity: 0; }
         }
         #instruction {
-            font-size: clamp(12px, 4.5vw, 18px);
+            font-size: clamp(14px, 4.5vw, 20px);
             max-width: 100%;
             overflow-wrap: break-word;
             z-index: 2;
             color: #F5F5F5;
             font-weight: bold;
             text-shadow: 0 0 5px rgba(245, 245, 245, 0.8);
-            transition: opacity 0.5s;
+            transition: opacity 0.5s ease;
             opacity: 0;
             margin-bottom: 1vh;
         }
         #timerInsideCircle {
-            font-size: clamp(20px, 8vw, 32px);
+            font-size: clamp(22px, 8vw, 34px);
             display: none;
             margin-top: 1vh;
             color: #F5F5F5;
@@ -272,24 +285,32 @@
             display: inline-block;
             margin: 0.5vh 1vw;
             padding: clamp(6px, 1vh, 12px) clamp(10px, 3vw, 20px);
-            font-size: clamp(10px, 3vw, 14px);
+            font-size: clamp(12px, 3vw, 16px);
             background-color: #90CAF9;
             color: #F5F5F5;
             text-decoration: none;
             border-radius: 5px;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s ease;
         }
         .link-button:hover {
             background-color: #64B5F6;
         }
-        @media (max-width: 400px) {
-            h1 { font-size: 14px; }
-            .settings input[type="range"] { width: 20vw; }
-            button, .settingsButton, .link-button { padding: 0.8vh 2vw; font-size: 12px; }
-            #roundInfo { font-size: 12px; }
-            .progress-bar { height: 10px; }
-            #instruction { font-size: 12px; }
-            #timerInsideCircle { font-size: 20px; }
+        @media (max-width: 400px) and (orientation: portrait) {
+            h1 { font-size: clamp(14px, 5vw, 20px); }
+            .settingsButton { 
+                width: min(90vw, 280px); 
+                padding: clamp(8px, 1.5vh, 12px) clamp(15px, 3vw, 25px); 
+                font-size: clamp(14px, 3.5vw, 18px); 
+            }
+            #startButton { width: min(80vw, 260px); height: min(80vw, 260px); }
+            #startText { font-size: clamp(18px, 6vw, 28px); }
+            .settings input[type="range"] { width: clamp(100px, 20vw, 140px); }
+            .settings span { font-size: clamp(10px, 2.5vw, 14px); }
+            button, .link-button { padding: clamp(5px, 1vh, 10px) clamp(8px, 2vw, 15px); font-size: clamp(10px, 2.5vw, 14px); }
+            #roundInfo { font-size: clamp(10px, 2.5vw, 14px); }
+            .progress-bar { height: clamp(6px, 1.5vw, 10px); }
+            #instruction { font-size: clamp(12px, 4vw, 16px); }
+            #timerInsideCircle { font-size: clamp(18px, 6vw, 28px); }
             .controls-section { flex-direction: column; }
             #pauseButton, #resetButton { margin: 0.5vh 0; }
         }
@@ -302,6 +323,7 @@
             <div id="roundInfo"></div>
         </div>
         <div class="initialView">
+            <button class="settingsButton" onclick="showSettings()">Настройки</button>
             <div class="circle-section">
                 <div class="circle" id="startButton" onclick="startSession()">
                     <div class="circle-content">
@@ -309,15 +331,14 @@
                     </div>
                 </div>
             </div>
-            <button class="settingsButton" onclick="showSettings()">Настройки</button>
         </div>
         <div class="settings" id="settings">
             <button class="closeSettings" onclick="closeSettings()">X</button>
             <div>
-                Время вдоха (сек): <input type="range" id="inhalationTime" min="1" max="10" value="2"><span id="inhalationTimeValue">2</span>
+                Время вдоха (сек): <input type="range" id="inhalationTime" min="1" max="4" value="2"><span id="inhalationTimeValue">2</span>
             </div>
             <div>
-                Время выдоха (сек): <input type="range" id="exhalationTime" min="1" max="10" value="2"><span id="exhalationTimeValue">2</span>
+                Время выдоха (сек): <input type="range" id="exhalationTime" min="1" max="4" value="2"><span id="exhalationTimeValue">2</span>
             </div>
             <div>
                 Начальная задержка дыхания (сек): <input type="range" id="initialBreathHoldTime" min="10" max="120" value="60"><span id="initialBreathHoldTimeValue">60</span>
@@ -351,6 +372,11 @@
         </div>
     </div>
 
+    <audio id="startAudio" src="./start.mp3"></audio>
+    <audio id="breathingAudio" src="./breathing.mp3"></audio>
+    <audio id="delayAudio" src="./delay.mp3" loop></audio>
+    <audio id="exhalationAudio" src="./exhalation.mp3"></audio>
+
     <script>
         const smallSize = 'min(50vw, 200px)';
         const largeSize = 'min(75vw, 300px)';
@@ -361,7 +387,11 @@
         let currentBreathHoldTime, currentCycle = 0, currentRound = 0;
         let isPaused = false, timerInterval, phaseTimeout, remainingTime, currentPhase, nextCallback;
 
-        // Обновление значений ползунков
+        const startAudio = document.getElementById('startAudio');
+        const breathingAudio = document.getElementById('breathingAudio');
+        const delayAudio = document.getElementById('delayAudio');
+        const exhalationAudio = document.getElementById('exhalationAudio');
+
         const sliders = ['inhalationTime', 'exhalationTime', 'initialBreathHoldTime', 'numberOfRounds'];
         sliders.forEach(id => {
             const slider = document.getElementById(id);
@@ -372,7 +402,7 @@
         });
 
         function showSettings() {
-            document.getElementById('settings').style.height = '80vh'; // 80% экрана
+            document.getElementById('settings').style.height = '80vh';
         }
 
         function closeSettings() {
@@ -381,13 +411,13 @@
 
         function setCircle(size, color, transitionTime) {
             const circle = document.getElementById('circle');
-            circle.style.transition = `width ${transitionTime}s, height ${transitionTime}s, border-color ${transitionTime}s, box-shadow ${transitionTime}s, opacity 0.5s`;
+            circle.style.transition = `width ${transitionTime}s ease, height ${transitionTime}s ease, border-color ${transitionTime}s ease, box-shadow ${transitionTime}s ease, opacity 0.5s ease`;
             circle.style.width = size;
             circle.style.height = size;
             circle.style.borderColor = color;
             circle.style.boxShadow = `0 0 20px ${color === inhalationColor ? 'rgba(102, 187, 106, 0.6)' : 'rgba(255, 171, 145, 0.6)'}`;
             circle.style.opacity = '1';
-            circle.style.display = 'flex'; // Убедимся, что круг виден
+            circle.style.display = 'flex';
         }
 
         function setCircleImmediate(size, color) {
@@ -398,7 +428,7 @@
             circle.style.borderColor = color;
             circle.style.boxShadow = `0 0 20px ${color === inhalationColor ? 'rgba(102, 187, 106, 0.6)' : 'rgba(255, 171, 145, 0.6)'}`;
             circle.style.opacity = '0.1';
-            circle.style.display = 'flex'; // Убедимся, что круг виден
+            circle.style.display = 'flex';
             window.setTimeout(() => { circle.style.transition = ''; }, 0);
         }
 
@@ -440,35 +470,24 @@
             document.getElementById('progressBar').style.width = `${progress}%`;
         }
 
-        function startCountdown(callback) {
-            const circle = document.getElementById('circle');
-            circle.style.display = 'flex'; // Убедимся, что круг виден
-            circle.style.opacity = '0.1';
-            let countdown = 3;
-            setInstruction(`Готовимся: ${countdown}`);
-            hideTimer();
-            const countdownInterval = setInterval(() => {
-                countdown--;
-                if (countdown > 0) {
-                    setInstruction(`Готовимся: ${countdown}`);
-                } else {
-                    clearInterval(countdownInterval);
-                    hideInstruction();
-                    callback();
-                }
-            }, 1000);
-        }
-
         function startPhase(phaseName, time, circleSize, circleColor, callback) {
             if (isPaused) return;
             setInstruction(phaseName === "ВДОХ" || phaseName === "ВЫДОХ" ? phaseName : phaseName.charAt(0).toUpperCase() + phaseName.slice(1));
             hideTimer();
             setCircle(circleSize, circleColor, time);
+            if (phaseName === 'ВДОХ' || phaseName === 'ВЫДОХ') {
+                breathingAudio.currentTime = 0;
+                breathingAudio.playbackRate = 2 / (inhalationTime + exhalationTime);
+                breathingAudio.play();
+            }
             currentPhase = phaseName;
             remainingTime = time;
             nextCallback = callback;
             phaseTimeout = window.setTimeout(() => {
-                if (!isPaused) callback();
+                if (!isPaused) {
+                    if (phaseName === 'ВЫДОХ' && currentCycle === 29) breathingAudio.pause();
+                    callback();
+                }
             }, time * 1000);
         }
 
@@ -486,16 +505,24 @@
                 callback();
             };
             setTimer(remaining);
+            delayAudio.play();
             timerInterval = window.setInterval(() => {
                 remaining--;
                 if (remaining >= 0 && !isPaused) {
                     setTimer(remaining);
+                    if (remaining === 7) {
+                        delayAudio.pause();
+                        exhalationAudio.currentTime = 0;
+                        exhalationAudio.play();
+                    }
                 }
             }, 1000);
             phaseTimeout = window.setTimeout(() => {
                 window.clearInterval(timerInterval);
                 setTimer(0);
                 ripple.classList.remove('active');
+                delayAudio.pause();
+                exhalationAudio.pause();
                 hideTimer();
                 if (!isPaused) callback();
             }, time * 1000);
@@ -535,6 +562,7 @@
             const deepInhalationTime = Math.round(inhalationTime * 1.2);
             const deepExhalationTime = Math.round(exhalationTime * 1.2);
             startPhase('ВЫДОХ', exhalationTime, smallSize, exhalationColor, () => {
+                breathingAudio.pause();
                 startHoldPhase('Задержка дыхания после выдоха', currentBreathHoldTime, smallSize, exhalationColor, () => {
                     startPhase('Глубокий вдох', deepInhalationTime, largeSize, inhalationColor, () => {
                         startHoldPhase('Задержка после глубокого вдоха', 15, largeSize, inhalationColor, () => {
@@ -550,14 +578,7 @@
         function startRound() {
             currentCycle = 0;
             setRoundInfo(currentRound + 1, numberOfRounds);
-            const circle = document.getElementById('circle');
-            circle.style.display = 'flex'; // Убедимся, что круг виден перед началом
-            startCountdown(() => {
-                startPhase('ВЫДОХ', exhalationTime, smallSize, exhalationColor, () => {
-                    showProgressbar();
-                    performCycle(0, performBreathHold);
-                });
-            });
+            performCycle(0, performBreathHold);
         }
 
         function startSession() {
@@ -567,20 +588,29 @@
             numberOfRounds = parseInt(document.getElementById('numberOfRounds').value) || 3;
             currentBreathHoldTime = initialBreathHoldTime;
             currentRound = 0;
+
             const container = document.getElementById('container');
             container.classList.remove('initial-visible');
             container.classList.add('breathing-visible');
-            document.getElementById('breathingSection').style.display = 'flex'; // Показываем секцию дыхания
+            document.getElementById('breathingSection').style.display = 'flex';
             document.getElementById('pauseButton').style.display = 'inline';
             document.getElementById('resetButton').style.display = 'inline';
-            setCircleImmediate(smallSize, exhalationColor); // Устанавливаем начальный круг
-            startRound(); // Запускаем первый раунд
+            document.getElementById('circle').style.display = 'none';
+
+            startAudio.currentTime = 0;
+            startAudio.play();
+            setTimeout(() => {
+                document.getElementById('circle').style.display = 'flex';
+                setCircleImmediate(largeSize, inhalationColor);
+                startRound();
+            }, 17000);
         }
 
         function endRound() {
             currentRound++;
             if (currentRound < numberOfRounds) {
                 currentBreathHoldTime = Math.round(currentBreathHoldTime * 1.68);
+                setCircleImmediate(largeSize, inhalationColor);
                 startRound();
             } else {
                 document.getElementById('roundInfo').style.display = 'none';
@@ -593,6 +623,10 @@
             if (!isPaused) {
                 clearInterval(timerInterval);
                 clearTimeout(phaseTimeout);
+                startAudio.pause();
+                breathingAudio.pause();
+                delayAudio.pause();
+                exhalationAudio.pause();
                 isPaused = true;
                 document.getElementById('pauseButton').innerHTML = 'Продолжить';
             } else {
@@ -609,6 +643,10 @@
         function resetSession() {
             clearInterval(timerInterval);
             clearTimeout(phaseTimeout);
+            startAudio.pause();
+            breathingAudio.pause();
+            delayAudio.pause();
+            exhalationAudio.pause();
             const container = document.getElementById('container');
             container.classList.remove('breathing-visible');
             container.classList.add('initial-visible');
@@ -623,8 +661,17 @@
             document.getElementById('pauseButton').innerHTML = 'Пауза';
             document.getElementById('progressBar').style.width = '0%';
             hideProgressbar();
-            document.getElementById('circle').style.display = 'none'; // Скрываем круг при сбросе
+            document.getElementById('circle').style.display = 'none';
         }
+
+        // Проверка загрузки аудиофайлов
+        window.onload = () => {
+            console.log('Checking audio files...');
+            [startAudio, breathingAudio, delayAudio, exhalationAudio].forEach(audio => {
+                audio.addEventListener('loadeddata', () => console.log(`${audio.src} loaded`));
+                audio.addEventListener('error', (e) => console.error(`${audio.src} failed to load:`, e));
+            });
+        };
     </script>
 </body>
 </html>
