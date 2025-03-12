@@ -372,10 +372,11 @@
         </div>
     </div>
 
-    <audio id="startAudio" src="./start.mp3"></audio>
-    <audio id="breathingAudio" src="./breathing.mp3"></audio>
-    <audio id="delayAudio" src="./delay.mp3" loop></audio>
-    <audio id="exhalationAudio" src="./exhalation.mp3"></audio>
+    <!-- Обновленные пути к аудиофайлам -->
+    <audio id="startAudio" src="/breathing-app/start.MP3"></audio>
+    <audio id="breathingAudio" src="/breathing-app/breathing.MP3"></audio>
+    <audio id="delayAudio" src="/breathing-app/delay.MP3" loop></audio>
+    <audio id="exhalationAudio" src="/breathing-app/exhalation.MP3"></audio>
 
     <script>
         const smallSize = 'min(50vw, 200px)';
@@ -391,6 +392,16 @@
         const breathingAudio = document.getElementById('breathingAudio');
         const delayAudio = document.getElementById('delayAudio');
         const exhalationAudio = document.getElementById('exhalationAudio');
+
+        // Отладка загрузки аудио
+        window.onload = () => {
+            console.log('Checking audio files...');
+            [startAudio, breathingAudio, delayAudio, exhalationAudio].forEach(audio => {
+                audio.addEventListener('loadeddata', () => console.log(`${audio.src} loaded successfully`));
+                audio.addEventListener('error', (e) => console.error(`${audio.src} failed to load:`, e));
+                audio.load();
+            });
+        };
 
         const sliders = ['inhalationTime', 'exhalationTime', 'initialBreathHoldTime', 'numberOfRounds'];
         sliders.forEach(id => {
@@ -472,13 +483,15 @@
 
         function startPhase(phaseName, time, circleSize, circleColor, callback) {
             if (isPaused) return;
+            console.log(`Starting phase: ${phaseName}`);
             setInstruction(phaseName === "ВДОХ" || phaseName === "ВЫДОХ" ? phaseName : phaseName.charAt(0).toUpperCase() + phaseName.slice(1));
             hideTimer();
             setCircle(circleSize, circleColor, time);
             if (phaseName === 'ВДОХ' || phaseName === 'ВЫДОХ') {
                 breathingAudio.currentTime = 0;
                 breathingAudio.playbackRate = 2 / (inhalationTime + exhalationTime);
-                breathingAudio.play();
+                console.log(`Playing breathing audio at rate ${breathingAudio.playbackRate}`);
+                breathingAudio.play().catch(e => console.error('Breathing audio play failed:', e));
             }
             currentPhase = phaseName;
             remainingTime = time;
@@ -493,6 +506,7 @@
 
         function startHoldPhase(phaseName, time, circleSize, circleColor, callback) {
             if (isPaused) return;
+            console.log(`Starting hold phase: ${phaseName}`);
             setInstruction(phaseName);
             setCircle(circleSize, circleColor, 0);
             const ripple = document.getElementById('rippleEffect');
@@ -505,7 +519,7 @@
                 callback();
             };
             setTimer(remaining);
-            delayAudio.play();
+            delayAudio.play().catch(e => console.error('Delay audio play failed:', e));
             timerInterval = window.setInterval(() => {
                 remaining--;
                 if (remaining >= 0 && !isPaused) {
@@ -513,7 +527,7 @@
                     if (remaining === 7) {
                         delayAudio.pause();
                         exhalationAudio.currentTime = 0;
-                        exhalationAudio.play();
+                        exhalationAudio.play().catch(e => console.error('Exhalation audio play failed:', e));
                     }
                 }
             }, 1000);
@@ -597,8 +611,9 @@
             document.getElementById('resetButton').style.display = 'inline';
             document.getElementById('circle').style.display = 'none';
 
+            console.log('Starting session with start.MP3');
             startAudio.currentTime = 0;
-            startAudio.play();
+            startAudio.play().catch(e => console.error('Start audio play failed:', e));
             setTimeout(() => {
                 document.getElementById('circle').style.display = 'flex';
                 setCircleImmediate(largeSize, inhalationColor);
@@ -663,15 +678,6 @@
             hideProgressbar();
             document.getElementById('circle').style.display = 'none';
         }
-
-        // Проверка загрузки аудиофайлов
-        window.onload = () => {
-            console.log('Checking audio files...');
-            [startAudio, breathingAudio, delayAudio, exhalationAudio].forEach(audio => {
-                audio.addEventListener('loadeddata', () => console.log(`${audio.src} loaded`));
-                audio.addEventListener('error', (e) => console.error(`${audio.src} failed to load:`, e));
-            });
-        };
     </script>
 </body>
 </html>
