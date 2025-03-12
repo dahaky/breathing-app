@@ -166,7 +166,7 @@
             background-color: transparent;
             border: 3px solid #FFAB91;
             box-shadow: 0 0 20px rgba(255, 171, 145, 0.6);
-            transition: width 1.5s linear, height 1.5s linear, border-color 1.5s linear, box-shadow 1.5s linear, opacity 0.5s ease;
+            transition: width 1.88s linear, height 1.88s linear, border-color 1.88s linear, box-shadow 1.88s linear, opacity 0.5s ease;
             position: relative;
             display: flex;
             align-items: center;
@@ -228,7 +228,7 @@
             background-color: #81C784;
             width: 0;
             border-radius: 10px;
-            transition: width 1.5s linear;
+            transition: width 1.88s linear;
         }
         .ripple {
             position: absolute;
@@ -383,7 +383,7 @@
         const largeSize = 'min(75vw, 300px)';
         const inhalationColor = '#90CAF9'; // Цвет кнопки "Начать"
         const exhalationColor = '#2A2F3A'; // Цвет фона
-        const PHASE_DURATION = 1.5; // 1.5 секунды на вдох, 1.5 секунды на выдох
+        const PHASE_DURATION = 1.88; // Установлено 1.88 секунды
 
         let initialBreathHoldTime, numberOfRounds;
         let currentBreathHoldTime, currentCycle = 0, currentRound = 0;
@@ -393,6 +393,23 @@
         const breathingAudio = document.getElementById('breathingAudio');
         const delayAudio = document.getElementById('delayAudio');
         const exhalationAudio = document.getElementById('exhalationAudio');
+        let audioContextUnlocked = false;
+
+        // Разблокировка аудио сразу после первого взаимодействия
+        function unlockAudio() {
+            if (audioContextUnlocked) return;
+            const audios = [startAudio, breathingAudio, delayAudio, exhalationAudio];
+            audios.forEach(audio => {
+                audio.play().then(() => {
+                    audio.pause();
+                    audio.currentTime = 0;
+                    console.log(`${audio.id} unlocked successfully`);
+                }).catch(e => {
+                    console.error(`Failed to unlock ${audio.id}:`, e);
+                });
+            });
+            audioContextUnlocked = true;
+        }
 
         window.onload = () => {
             console.log('Checking audio files...');
@@ -472,6 +489,14 @@
             document.getElementById('progressBar').style.transition = `width ${PHASE_DURATION}s linear`;
         }
 
+        function playAudio(audio) {
+            audio.currentTime = 0;
+            audio.play().catch(e => {
+                console.error(`Failed to play ${audio.id}:`, e);
+                alert(`Не удалось воспроизвести ${audio.id}. Пожалуйста, убедитесь, что звук включен, и попробуйте снова.`);
+            });
+        }
+
         function startPhase(phaseName, circleSize, isInhalation, callback) {
             if (isPaused) return;
             console.log(`Starting phase: ${phaseName} at ${new Date().toISOString()}`);
@@ -498,15 +523,14 @@
                 callback();
             };
             setTimer(remaining);
-            delayAudio.play().catch(e => console.error('Delay audio play failed:', e));
+            playAudio(delayAudio);
             timerInterval = window.setInterval(() => {
                 remaining--;
                 if (remaining >= 0 && !isPaused) {
                     setTimer(remaining);
                     if (remaining === 7) {
                         delayAudio.pause();
-                        exhalationAudio.currentTime = 0;
-                        exhalationAudio.play().catch(e => console.error('Exhalation audio play failed:', e));
+                        playAudio(exhalationAudio);
                     }
                 }
             }, 1000);
@@ -539,15 +563,7 @@
 
         function performCycle(index, callback) {
             if (index === 0) {
-                breathingAudio.currentTime = 0; // Начинаем с начала файла
-                breathingAudio.play().catch(e => {
-                    console.error('Breathing audio play failed:', e);
-                    alert('Не удалось запустить аудио breathing.mp3. Пожалуйста, попробуйте еще раз нажать "Начать". Если проблема сохраняется, убедитесь, что звук включен и путь к файлу верен.');
-                    // Попытка повторного запуска
-                    setTimeout(() => {
-                        breathingAudio.play().catch(e => console.error('Second attempt failed:', e));
-                    }, 1000);
-                });
+                playAudio(breathingAudio);
                 showProgressbar();
             }
             const isInhalation = index % 2 === 0;
@@ -595,14 +611,16 @@
             currentBreathHoldTime = initialBreathHoldTime;
             currentRound = 0;
 
+            // Разблокировка аудио после первого клика
+            unlockAudio();
+
             const container = document.getElementById('container');
             container.classList.remove('initial-visible');
             container.classList.add('preparing'); // Добавляем класс для подготовки
             document.getElementById('preparationText').style.display = 'block';
 
             console.log('Starting session with start.MP3');
-            startAudio.currentTime = 0;
-            startAudio.play().catch(e => console.error('Start audio play failed:', e));
+            playAudio(startAudio);
             setTimeout(() => {
                 container.classList.remove('preparing');
                 container.classList.add('breathing-visible');
