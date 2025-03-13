@@ -166,7 +166,8 @@
             background-color: transparent;
             border: 3px solid #FFAB91;
             box-shadow: 0 0 20px rgba(255, 171, 145, 0.6);
-            transition: width 1.88s linear, height 1.88s linear, border-color 1.88s linear, box-shadow 1.88s linear, opacity 0.5s ease;
+            transition-property: width, height, border-color, box-shadow, opacity;
+            transition-timing-function: ease-in-out;
             position: relative;
             display: flex;
             align-items: center;
@@ -229,7 +230,7 @@
             background-color: #81C784;
             width: 0;
             border-radius: 10px;
-            transition: width 1.88s linear;
+            transition: width 1.8548s linear;
         }
         .ripple {
             position: absolute;
@@ -449,7 +450,13 @@
         const largeSize = 'min(75vw, 300px)';
         const inhalationColor = '#90CAF9'; // Цвет кнопки "Начать"
         const exhalationColor = '#2A2F3A'; // Цвет фона
-        const PHASE_DURATION = 1.88; // Время на одну фазу (вдох или выдох)
+        const PHASE_DURATION = 1.8548; // Длительность обычной фазы (вдох или выдох)
+        const ACTIVE_DURATION = PHASE_DURATION * 0.7; // Активное время (70% фазы)
+        const PAUSE_DURATION = PHASE_DURATION * 0.3; // Пауза на пике (30% фазы)
+        const LAST_PHASE_DURATION = PHASE_DURATION * 2; // Длительность последнего вдоха/выдоха
+        const LAST_ACTIVE_DURATION = LAST_PHASE_DURATION * 0.7; // Активное время для последнего вдоха/выдоха
+        const LAST_PAUSE_DURATION = LAST_PHASE_DURATION * 0.3; // Пауза для последнего вдоха/выдоха
+        const AUDIO_START_DELAY = 2000; // Задержка перед началом анимации (вдох начинается на 2-й секунде)
 
         let initialBreathHoldTime, numberOfRounds;
         let currentBreathHoldTime, currentCycle = 0, currentRound = 0;
@@ -541,9 +548,9 @@
         }
 
         // Установка размера и стиля круга
-        function setCircle(size, isInhalation) {
+        function setCircle(size, isInhalation, activeDuration) {
             const circle = document.getElementById('circle');
-            circle.style.transition = `width ${PHASE_DURATION}s linear, height ${PHASE_DURATION}s linear, border-color ${PHASE_DURATION}s linear, box-shadow ${PHASE_DURATION}s linear, opacity 0.5s ease`;
+            circle.style.transition = `width ${activeDuration}s ease-in-out, height ${activeDuration}s ease-in-out, border-color ${activeDuration}s ease-in-out, box-shadow ${activeDuration}s ease-in-out, opacity 0.5s ease`;
             circle.style.width = size;
             circle.style.height = size;
             circle.classList.remove('inhalation', 'exhalation');
@@ -600,15 +607,19 @@
         }
 
         // Начало фазы
-        function startPhase(phaseName, circleSize, isInhalation, callback) {
+        function startPhase(phaseName, circleSize, isInhalation, activeDuration, pauseDuration, callback) {
             if (isPaused) return;
             console.log(`Starting phase: ${phaseName} at ${new Date().toISOString()}`);
             setInstruction(phaseName);
-            setCircle(circleSize, isInhalation);
+            setCircle(circleSize, isInhalation, activeDuration);
             currentPhase = phaseName;
             phaseTimeout = window.setTimeout(() => {
-                if (!isPaused) callback();
-            }, PHASE_DURATION * 1000);
+                if (!isPaused) {
+                    setTimeout(() => {
+                        if (!isPaused) callback();
+                    }, pauseDuration * 1000); // Пауза на пике
+                }
+            }, activeDuration * 1000);
         }
 
         // Начало фазы задержки дыхания
@@ -616,7 +627,7 @@
             if (isPaused) return;
             console.log(`Starting hold phase: ${phaseName} at ${new Date().toISOString()}`);
             setInstruction(phaseName);
-            setCircle(circleSize, isInhalation);
+            setCircle(circleSize, isInhalation, 0.5); // Быстрая анимация для задержки
             const ripple = document.getElementById('rippleEffect');
             ripple.classList.add('active');
             let remaining = time;
@@ -651,17 +662,19 @@
         // Возобновление фазы
         function resumePhase() {
             if (currentPhase === 'ВДОХ') {
-                startPhase('ВДОХ', largeSize, true, nextCallback);
+                const isLastPhase = currentCycle === 58;
+                startPhase('ВДОХ', largeSize, true, isLastPhase ? LAST_ACTIVE_DURATION : ACTIVE_DURATION, isLastPhase ? LAST_PAUSE_DURATION : PAUSE_DURATION, nextCallback);
             } else if (currentPhase === 'ВЫДОХ') {
-                startPhase('ВЫДОХ', smallSize, false, nextCallback);
+                const isLastPhase = currentCycle === 59;
+                startPhase('ВЫДОХ', smallSize, false, isLastPhase ? LAST_ACTIVE_DURATION : ACTIVE_DURATION, isLastPhase ? LAST_PAUSE_DURATION : PAUSE_DURATION, nextCallback);
             } else if (currentPhase === 'Задержка дыхания после выдоха') {
                 startHoldPhase('Задержка дыхания после выдоха', remainingTime, smallSize, false, nextCallback);
             } else if (currentPhase === 'Глубокий вдох') {
-                startPhase('Глубокий вдох', largeSize, true, nextCallback);
+                startPhase('Глубокий вдох', largeSize, true, ACTIVE_DURATION, PAUSE_DURATION, nextCallback);
             } else if (currentPhase === 'Задержка после глубокого вдоха') {
                 startHoldPhase('Задержка после глубокого вдоха', remainingTime, largeSize, true, nextCallback);
             } else if (currentPhase === 'Финальный выдох') {
-                startPhase('Финальный выдох', smallSize, false, nextCallback);
+                startPhase('Финальный выдох', smallSize, false, ACTIVE_DURATION, PAUSE_DURATION, nextCallback);
             }
         }
 
@@ -672,9 +685,14 @@
                 showProgressbar();
             }
             const isInhalation = index % 2 === 0;
+            const isLastPhase = index === 58 || index === 59;
+            const activeDuration = isLastPhase ? LAST_ACTIVE_DURATION : ACTIVE_DURATION;
+            const pauseDuration = isLastPhase ? LAST_PAUSE_DURATION : PAUSE_DURATION;
             startPhase(isInhalation ? 'ВДОХ' : 'ВЫДОХ', 
                       isInhalation ? largeSize : smallSize, 
                       isInhalation, 
+                      activeDuration, 
+                      pauseDuration, 
                       () => {
                           updateProgressbar(index + 1);
                           if (index < 59) { // 60 фаз: 0-59 (30 вдохов + 30 выдохов)
@@ -691,12 +709,12 @@
         function performBreathHold() {
             const deepInhalationTime = Math.round(PHASE_DURATION * 1.2);
             const deepExhalationTime = Math.round(PHASE_DURATION * 1.2);
-            startPhase('ВЫДОХ', smallSize, false, () => {
+            startPhase('ВЫДОХ', smallSize, false, ACTIVE_DURATION, PAUSE_DURATION, () => {
                 stopAudio();
                 startHoldPhase('Задержка дыхания после выдоха', currentBreathHoldTime, smallSize, false, () => {
-                    startPhase('Глубокий вдох', largeSize, true, () => {
+                    startPhase('Глубокий вдох', largeSize, true, ACTIVE_DURATION, PAUSE_DURATION, () => {
                         startHoldPhase('Задержка после глубокого вдоха', 15, largeSize, true, () => {
-                            startPhase('Финальный выдох', smallSize, false, () => {
+                            startPhase('Финальный выдох', smallSize, false, ACTIVE_DURATION, PAUSE_DURATION, () => {
                                 endRound();
                             });
                         });
@@ -709,7 +727,9 @@
         function startRound() {
             currentCycle = 0;
             setRoundInfo(currentRound + 1, numberOfRounds);
-            performCycle(0, performBreathHold);
+            setTimeout(() => {
+                performCycle(0, performBreathHold);
+            }, AUDIO_START_DELAY); // Задержка в 2 секунды перед началом анимации
         }
 
         // Начало сессии
@@ -718,7 +738,6 @@
             document.getElementById('soundModal').style.display = 'none';
 
             if (soundEnabled) {
-                // Разблокировка аудио контекста
                 if (audioContext.state === 'suspended') {
                     await audioContext.resume();
                     console.log('Audio context resumed, state:', audioContext.state);
@@ -751,7 +770,7 @@
                 document.getElementById('resetButton').style.display = 'inline';
                 document.getElementById('circle').style.display = 'flex';
                 document.getElementById('preparationText').style.display = 'none';
-                setCircle(largeSize, true);
+                setCircle(largeSize, true, ACTIVE_DURATION);
                 startRound();
             }, 17000); // Синхронизация с окончанием start.mp3 (17 секунд)
         }
@@ -761,7 +780,7 @@
             currentRound++;
             if (currentRound < numberOfRounds) {
                 currentBreathHoldTime = Math.round(currentBreathHoldTime * 1.68);
-                setCircle(largeSize, true);
+                setCircle(largeSize, true, ACTIVE_DURATION);
                 startRound();
             } else {
                 document.getElementById('roundInfo').style.display = 'none';
