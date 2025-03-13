@@ -405,7 +405,12 @@
                 audio.addEventListener('loadeddata', () => {
                     console.log(`${audio.src} loaded successfully, duration: ${audio.duration}s`);
                 });
-                audio.addEventListener('error', (e) => console.error(`${audio.src} failed to load:`, e));
+                audio.addEventListener('error', (e) => {
+                    console.error(`${audio.src} failed to load:`, e);
+                    if (audio.id === 'silentClip') {
+                        console.warn('Silent clip not found. Ensure silent.mp3 is uploaded to /breathing-app/');
+                    }
+                });
                 audio.load();
             });
         };
@@ -642,7 +647,7 @@
                 }, 17000); // Синхронизация с окончанием start.mp3 (17 секунд)
             }).catch(e => {
                 console.error('Failed to play silent clip:', e);
-                alert('Не удалось разблокировать аудио контекст. Пожалуйста, попробуйте снова или проверьте настройки устройства.');
+                alert('Не удалось разблокировать аудио контекст. Убедитесь, что файл silent.mp3 загружен в /breathing-app/ и доступен по https://dahaky.github.io/breathing-app/silent.mp3. Попробуйте снова или перезагрузите страницу.');
             });
         }
 
