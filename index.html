@@ -159,6 +159,19 @@
             max-height: 70vh;
             justify-content: center;
         }
+        #instruction {
+            font-size: clamp(14px, 4.5vw, 20px);
+            max-width: 100%;
+            overflow-wrap: break-word;
+            color: #F5F5F5;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(245, 245, 245, 0.8);
+            transition: opacity 0.5s ease;
+            opacity: 0;
+            margin-bottom: 1vh;
+            position: absolute;
+            top: 0;
+        }
         .circle {
             width: min(50vw, 200px);
             height: min(50vw, 200px);
@@ -247,18 +260,6 @@
         @keyframes ripple {
             0% { width: 0; height: 0; opacity: 1; }
             100% { width: min(75vw, 300px); height: min(75vw, 300px); opacity: 0; }
-        }
-        #instruction {
-            font-size: clamp(14px, 4.5vw, 20px);
-            max-width: 100%;
-            overflow-wrap: break-word;
-            z-index: 2;
-            color: #F5F5F5;
-            font-weight: bold;
-            text-shadow: 0 0 5px rgba(245, 245, 245, 0.8);
-            transition: opacity 0.5s ease;
-            opacity: 0;
-            margin-bottom: 1vh;
         }
         #timerInsideCircle {
             font-size: clamp(22px, 8vw, 34px);
@@ -411,9 +412,9 @@
         </div>
         <div id="breathingSection" style="display: none;">
             <div class="circle-section">
+                <div id="instruction"></div>
                 <div class="circle" id="circle">
                     <div class="circle-content">
-                        <div id="instruction"></div>
                         <div class="progress-bar" id="progressBarContainer">
                             <div class="progress-bar-fill" id="progressBar"></div>
                         </div>
@@ -451,11 +452,11 @@
         const inhalationColor = '#90CAF9'; // Цвет кнопки "Начать"
         const exhalationColor = '#2A2F3A'; // Цвет фона
         const PHASE_DURATION = 1.8548; // Длительность обычной фазы (вдох или выдох)
-        const ACTIVE_DURATION = PHASE_DURATION * 0.7; // Активное время (70% фазы)
-        const PAUSE_DURATION = PHASE_DURATION * 0.3; // Пауза на пике (30% фазы)
+        const ACTIVE_DURATION = PHASE_DURATION * 0.2; // Активное время (20% фазы)
+        const PAUSE_DURATION = PHASE_DURATION * 0.8; // Пауза на пике (80% фазы)
         const LAST_PHASE_DURATION = PHASE_DURATION * 2; // Длительность последнего вдоха/выдоха
-        const LAST_ACTIVE_DURATION = LAST_PHASE_DURATION * 0.7; // Активное время для последнего вдоха/выдоха
-        const LAST_PAUSE_DURATION = LAST_PHASE_DURATION * 0.3; // Пауза для последнего вдоха/выдоха
+        const LAST_ACTIVE_DURATION = LAST_PHASE_DURATION * 0.2; // Активное время для последнего вдоха/выдоха
+        const LAST_PAUSE_DURATION = LAST_PHASE_DURATION * 0.8; // Пауза для последнего вдоха/выдоха
         const AUDIO_START_DELAY = 2000; // Задержка перед началом анимации (вдох начинается на 2-й секунде)
 
         let initialBreathHoldTime, numberOfRounds;
@@ -770,7 +771,7 @@
                 document.getElementById('resetButton').style.display = 'inline';
                 document.getElementById('circle').style.display = 'flex';
                 document.getElementById('preparationText').style.display = 'none';
-                setCircle(largeSize, true, ACTIVE_DURATION);
+                setCircle(smallSize, false, ACTIVE_DURATION); // Начинаем с уменьшенного круга (состояние выдоха)
                 startRound();
             }, 17000); // Синхронизация с окончанием start.mp3 (17 секунд)
         }
@@ -780,7 +781,7 @@
             currentRound++;
             if (currentRound < numberOfRounds) {
                 currentBreathHoldTime = Math.round(currentBreathHoldTime * 1.68);
-                setCircle(largeSize, true, ACTIVE_DURATION);
+                setCircle(smallSize, false, ACTIVE_DURATION);
                 startRound();
             } else {
                 document.getElementById('roundInfo').style.display = 'none';
