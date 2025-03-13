@@ -72,55 +72,6 @@
             background-color: #28A745; /* Еще темнее при нажатии */
             transform: scale(0.98);
         }
-        .toggle-container {
-            display: flex;
-            align-items: center;
-            gap: 1vw;
-            margin: 1vh 0;
-        }
-        .toggle-label {
-            display: flex;
-            align-items: center;
-        }
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 24px;
-        }
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: 0.4s;
-            border-radius: 24px;
-        }
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: 0.4s;
-            border-radius: 50%;
-        }
-        input:checked + .slider {
-            background-color: #34C759;
-        }
-        input:checked + .slider:before {
-            transform: translateX(26px);
-        }
         .settings {
             display: none;
             flex-direction: column;
@@ -240,7 +191,7 @@
             opacity: 1;
             transition: transform 0.3s ease;
             border-radius: 50%;
-            display: none; /* Скрыта до активации звука */
+            display: flex; /* Теперь сразу видима */
         }
         #startButton:hover {
             transform: scale(1.05);
@@ -381,17 +332,8 @@
         </div>
         <div class="initialView">
             <button class="settingsButton" onclick="showSettings()">Настройки</button>
-            <div class="toggle-container">
-                <label class="toggle-label">
-                    Включить звук
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="soundToggle" onchange="toggleSound()">
-                        <span class="slider"></span>
-                    </label>
-                </label>
-            </div>
             <div class="circle-section">
-                <div class="circle" id="startButton" onclick="startSession()" style="display: none;">
+                <div class="circle" id="startButton" onclick="startSession()">
                     <div class="circle-content">
                         <div id="startText">Начать</div>
                     </div>
@@ -432,6 +374,7 @@
         </div>
     </div>
 
+    <audio id="silentClip" src="/breathing-app/silent.mp3" preload="auto"></audio>
     <audio id="startAudio" src="/breathing-app/start.MP3" preload="auto"></audio>
     <audio id="breathingAudio" src="/breathing-app/breathing.MP3" preload="auto"></audio>
     <audio id="delayAudio" src="/breathing-app/delay.MP3" preload="auto" loop></audio>
@@ -449,57 +392,22 @@
         let isPaused = false, timerInterval, phaseTimeout, remainingTime, currentPhase, nextCallback;
         let soundEnabled = false;
 
+        const silentClip = document.getElementById('silentClip');
         const startAudio = document.getElementById('startAudio');
         const breathingAudio = document.getElementById('breathingAudio');
         const delayAudio = document.getElementById('delayAudio');
         const exhalationAudio = document.getElementById('exhalationAudio');
 
-        // Разблокировка аудио контекста
-        function unlockAudio() {
-            if (soundEnabled) return;
-            const audios = [startAudio, breathingAudio, delayAudio, exhalationAudio];
-            audios.forEach(audio => {
-                audio.play().then(() => {
-                    audio.pause();
-                    audio.currentTime = 0;
-                    console.log(`${audio.id} unlocked successfully`);
-                }).catch(e => {
-                    console.error(`Failed to unlock ${audio.id}:`, e);
-                });
-            });
-            soundEnabled = true;
-        }
-
-        // Обработка переключения тумблера
-        function toggleSound() {
-            const toggle = document.getElementById('soundToggle');
-            const startButton = document.getElementById('startButton');
-            console.log('Toggle sound called, checked:', toggle.checked); // Отладка
-            if (toggle.checked) {
-                console.log('Sound enabled, unlocking audio...');
-                unlockAudio();
-                startButton.style.display = 'flex'; // Показываем кнопку "Начать"
-                document.getElementById('startText').innerHTML = 'Начать';
-            } else {
-                console.log('Sound disabled');
-                soundEnabled = false;
-                startButton.style.display = 'none'; // Скрываем кнопку "Начать"
-                document.getElementById('startText').innerHTML = 'Разблокируйте звук';
-            }
-        }
-
         // Проверка загрузки аудиофайлов
         window.onload = () => {
             console.log('Checking audio files...');
-            [startAudio, breathingAudio, delayAudio, exhalationAudio].forEach(audio => {
+            [silentClip, startAudio, breathingAudio, delayAudio, exhalationAudio].forEach(audio => {
                 audio.addEventListener('loadeddata', () => {
                     console.log(`${audio.src} loaded successfully, duration: ${audio.duration}s`);
                 });
                 audio.addEventListener('error', (e) => console.error(`${audio.src} failed to load:`, e));
                 audio.load();
             });
-            // Изначально скрываем кнопку "Начать"
-            document.getElementById('startButton').style.display = 'none';
         };
 
         // Обработка слайдеров настроек
@@ -583,13 +491,12 @@
 
         // Воспроизведение аудио
         function playAudio(audio) {
-            if (soundEnabled) {
-                audio.currentTime = 0;
-                audio.play().catch(e => {
-                    console.error(`Failed to play ${audio.id}:`, e);
-                    alert(`Не удалось воспроизвести ${audio.id}. Пожалуйста, убедитесь, что звук включен, проверьте доступность файла, или перезагрузите страницу.`);
-                });
-            }
+            if (!soundEnabled) return; // Аудио воспроизводится только после разблокировки
+            audio.currentTime = 0;
+            audio.play().catch(e => {
+                console.error(`Failed to play ${audio.id}:`, e);
+                alert(`Не удалось воспроизвести ${audio.id}. Пожалуйста, убедитесь, что звук включен, проверьте доступность файла, или перезагрузите страницу.`);
+            });
         }
 
         // Начало фазы
@@ -708,33 +615,35 @@
 
         // Начало сессии
         function startSession() {
-            if (!soundEnabled) {
-                alert('Пожалуйста, включите звук с помощью тумблера.');
-                return;
-            }
-            initialBreathHoldTime = parseInt(document.getElementById('initialBreathHoldTime').value) || 60;
-            numberOfRounds = parseInt(document.getElementById('numberOfRounds').value) || 3;
-            currentBreathHoldTime = initialBreathHoldTime;
-            currentRound = 0;
+            document.getElementById('silentClip').play().then(() => {
+                soundEnabled = true; // Разблокируем аудио контекст
+                initialBreathHoldTime = parseInt(document.getElementById('initialBreathHoldTime').value) || 60;
+                numberOfRounds = parseInt(document.getElementById('numberOfRounds').value) || 3;
+                currentBreathHoldTime = initialBreathHoldTime;
+                currentRound = 0;
 
-            const container = document.getElementById('container');
-            container.classList.remove('initial-visible');
-            container.classList.add('preparing'); // Подготовка
-            document.getElementById('preparationText').style.display = 'block';
+                const container = document.getElementById('container');
+                container.classList.remove('initial-visible');
+                container.classList.add('preparing');
+                document.getElementById('preparationText').style.display = 'block';
 
-            console.log('Starting session with start.MP3');
-            playAudio(startAudio);
-            setTimeout(() => {
-                container.classList.remove('preparing');
-                container.classList.add('breathing-visible');
-                document.getElementById('breathingSection').style.display = 'flex';
-                document.getElementById('pauseButton').style.display = 'inline';
-                document.getElementById('resetButton').style.display = 'inline';
-                document.getElementById('circle').style.display = 'flex';
-                document.getElementById('preparationText').style.display = 'none';
-                setCircle(largeSize, true);
-                startRound();
-            }, 17000); // Синхронизация с окончанием start.mp3 (17 секунд)
+                console.log('Starting session with start.MP3');
+                playAudio(startAudio);
+                setTimeout(() => {
+                    container.classList.remove('preparing');
+                    container.classList.add('breathing-visible');
+                    document.getElementById('breathingSection').style.display = 'flex';
+                    document.getElementById('pauseButton').style.display = 'inline';
+                    document.getElementById('resetButton').style.display = 'inline';
+                    document.getElementById('circle').style.display = 'flex';
+                    document.getElementById('preparationText').style.display = 'none';
+                    setCircle(largeSize, true);
+                    startRound();
+                }, 17000); // Синхронизация с окончанием start.mp3 (17 секунд)
+            }).catch(e => {
+                console.error('Failed to play silent clip:', e);
+                alert('Не удалось разблокировать аудио контекст. Пожалуйста, попробуйте снова или проверьте настройки устройства.');
+            });
         }
 
         // Завершение раунда
