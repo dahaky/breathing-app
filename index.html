@@ -436,19 +436,13 @@
     <!-- Модальное окно для выбора звука -->
     <div id="soundModal" class="modal">
         <div class="modal-content">
-            <p>Вы хотите использовать звук?</p>
+            <p>Вы хотите использовать звук? <br>На iOS/Android убедитесь, что устройство не в режиме "Без звука".</p>
             <div class="modal-buttons">
                 <button id="modalYes" onclick="startSession(true)">Да</button>
                 <button id="modalNo" onclick="startSession(false)">Нет</button>
             </div>
         </div>
     </div>
-
-    <!-- Аудио элементы (без silent.mp3) -->
-    <audio id="startAudio" src="/breathing-app/start.MP3" preload="auto"></audio>
-    <audio id="breathingAudio" src="/breathing-app/breathing.MP3" preload="auto"></audio>
-    <audio id="delayAudio" src="/breathing-app/delay.MP3" preload="auto" loop></audio>
-    <audio id="exhalationAudio" src="/breathing-app/exhalation.MP3" preload="auto"></audio>
 
     <script>
         const smallSize = 'min(50vw, 200px)';
@@ -461,24 +455,64 @@
         let currentBreathHoldTime, currentCycle = 0, currentRound = 0;
         let isPaused = false, timerInterval, phaseTimeout, remainingTime, currentPhase, nextCallback;
         let soundEnabled = false;
+        let audioContext, startAudioBuffer, breathingAudioBuffer, delayAudioBuffer, exhalationAudioBuffer;
+        let currentSource = null;
 
-        const startAudio = document.getElementById('startAudio');
-        const breathingAudio = document.getElementById('breathingAudio');
-        const delayAudio = document.getElementById('delayAudio');
-        const exhalationAudio = document.getElementById('exhalationAudio');
+        // Инициализация Web Audio API
+        async function initAudioContext() {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioContext.state === 'suspended') {
+                await audioContext.resume();
+            }
+            console.log('Audio context state:', audioContext.state);
+        }
 
-        // Проверка загрузки аудиофайлов
-        window.onload = () => {
-            console.log('Checking audio files...');
-            [startAudio, breathingAudio, delayAudio, exhalationAudio].forEach(audio => {
-                audio.addEventListener('loadeddata', () => {
-                    console.log(`${audio.src} loaded successfully, duration: ${audio.duration}s`);
-                });
-                audio.addEventListener('error', (e) => {
-                    console.error(`${audio.src} failed to load:`, e);
-                });
-                audio.load();
-            });
+        // Загрузка аудиофайлов через fetch и декодирование в буферы
+        async function loadAudio(url) {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
+                const arrayBuffer = await response.arrayBuffer();
+                const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                console.log(`${url} loaded successfully, duration: ${audioBuffer.duration}s`);
+                return audioBuffer;
+            } catch (e) {
+                console.error(`Error loading audio ${url}:`, e);
+                alert(`Не удалось загрузить аудиофайл ${url}. Проверьте подключение к интернету или перезагрузите страницу.`);
+                return null;
+            }
+        }
+
+        // Воспроизведение аудио через Web Audio API
+        function playAudioBuffer(buffer, loop = false) {
+            if (!soundEnabled || !buffer) return;
+            if (currentSource) {
+                currentSource.stop();
+                currentSource.disconnect();
+            }
+            currentSource = audioContext.createBufferSource();
+            currentSource.buffer = buffer;
+            currentSource.loop = loop;
+            currentSource.connect(audioContext.destination);
+            currentSource.start();
+        }
+
+        // Остановка текущего воспроизведения
+        function stopAudio() {
+            if (currentSource) {
+                currentSource.stop();
+                currentSource.disconnect();
+                currentSource = null;
+            }
+        }
+
+        // Загрузка всех аудиофайлов при старте
+        window.onload = async () => {
+            await initAudioContext();
+            startAudioBuffer = await loadAudio('/breathing-app/start.MP3');
+            breathingAudioBuffer = await loadAudio('/breathing-app/breathing.MP3');
+            delayAudioBuffer = await loadAudio('/breathing-app/delay.MP3');
+            exhalationAudioBuffer = await loadAudio('/breathing-app/exhalation.MP3');
         };
 
         // Показ модального окна
@@ -565,16 +599,6 @@
             document.getElementById('progressBar').style.transition = `width ${PHASE_DURATION}s linear`;
         }
 
-        // Воспроизведение аудио
-        function playAudio(audio) {
-            if (!soundEnabled) return; // Аудио воспроизводится только если включен звук
-            audio.currentTime = 0;
-            audio.play().catch(e => {
-                console.error(`Failed to play ${audio.id}:`, e);
-                alert(`Не удалось воспроизвести ${audio.id}. Пожалуйста, убедитесь, что звук включен, проверьте доступность файла, или перезагрузите страницу.`);
-            });
-        }
-
         // Начало фазы
         function startPhase(phaseName, circleSize, isInhalation, callback) {
             if (isPaused) return;
@@ -603,14 +627,14 @@
                 callback();
             };
             setTimer(remaining);
-            if (soundEnabled) playAudio(delayAudio);
+            playAudioBuffer(delayAudioBuffer, true);
             timerInterval = window.setInterval(() => {
                 remaining--;
                 if (remaining >= 0 && !isPaused) {
                     setTimer(remaining);
-                    if (remaining === 7 && soundEnabled) {
-                        delayAudio.pause();
-                        playAudio(exhalationAudio);
+                    if (remaining === 7) {
+                        stopAudio();
+                        playAudioBuffer(exhalationAudioBuffer);
                     }
                 }
             }, 1000);
@@ -618,8 +642,7 @@
                 window.clearInterval(timerInterval);
                 setTimer(0);
                 ripple.classList.remove('active');
-                delayAudio.pause();
-                exhalationAudio.pause();
+                stopAudio();
                 hideTimer();
                 if (!isPaused) callback();
             }, time * 1000);
@@ -645,7 +668,7 @@
         // Выполнение цикла дыхания
         function performCycle(index, callback) {
             if (index === 0) {
-                if (soundEnabled) playAudio(breathingAudio);
+                playAudioBuffer(breathingAudioBuffer);
                 showProgressbar();
             }
             const isInhalation = index % 2 === 0;
@@ -657,7 +680,7 @@
                           if (index < 59) { // 60 фаз: 0-59 (30 вдохов + 30 выдохов)
                               performCycle(index + 1, callback);
                           } else {
-                              breathingAudio.pause();
+                              stopAudio();
                               hideProgressbar();
                               callback();
                           }
@@ -669,7 +692,7 @@
             const deepInhalationTime = Math.round(PHASE_DURATION * 1.2);
             const deepExhalationTime = Math.round(PHASE_DURATION * 1.2);
             startPhase('ВЫДОХ', smallSize, false, () => {
-                breathingAudio.pause();
+                stopAudio();
                 startHoldPhase('Задержка дыхания после выдоха', currentBreathHoldTime, smallSize, false, () => {
                     startPhase('Глубокий вдох', largeSize, true, () => {
                         startHoldPhase('Задержка после глубокого вдоха', 15, largeSize, true, () => {
@@ -690,14 +713,17 @@
         }
 
         // Начало сессии
-        function startSession(useSound) {
+        async function startSession(useSound) {
             soundEnabled = useSound;
             document.getElementById('soundModal').style.display = 'none';
 
             if (soundEnabled) {
-                // Разблокировка аудио контекста с помощью Web Audio API
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const buffer = audioContext.createBuffer(1, 1, 22050); // 1 канал, 1 сэмпл, частота 22050 Гц
+                // Разблокировка аудио контекста
+                if (audioContext.state === 'suspended') {
+                    await audioContext.resume();
+                    console.log('Audio context resumed, state:', audioContext.state);
+                }
+                const buffer = audioContext.createBuffer(1, 1, 22050);
                 const source = audioContext.createBufferSource();
                 source.buffer = buffer;
                 source.connect(audioContext.destination);
@@ -716,7 +742,7 @@
             document.getElementById('preparationText').style.display = 'block';
 
             console.log('Starting session with start.MP3');
-            if (soundEnabled) playAudio(startAudio);
+            if (soundEnabled) playAudioBuffer(startAudioBuffer);
             setTimeout(() => {
                 container.classList.remove('preparing');
                 container.classList.add('breathing-visible');
@@ -749,10 +775,7 @@
             if (!isPaused) {
                 clearInterval(timerInterval);
                 clearTimeout(phaseTimeout);
-                startAudio.pause();
-                breathingAudio.pause();
-                delayAudio.pause();
-                exhalationAudio.pause();
+                stopAudio();
                 isPaused = true;
                 document.getElementById('pauseButton').innerHTML = 'Продолжить';
             } else {
@@ -771,10 +794,7 @@
         function resetSession() {
             clearInterval(timerInterval);
             clearTimeout(phaseTimeout);
-            startAudio.pause();
-            breathingAudio.pause();
-            delayAudio.pause();
-            exhalationAudio.pause();
+            stopAudio();
             const container = document.getElementById('container');
             container.classList.remove('breathing-visible', 'preparing');
             container.classList.add('initial-visible');
